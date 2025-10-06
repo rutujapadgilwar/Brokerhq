@@ -29,7 +29,7 @@ import { styled } from "@mui/material/styles";
 import Navbar from "../components/dashboard/Navbar";
 import ExpansionNews from "../components/tenantDetailsPage/ExpansionNews";
 import ContractionNews from "../components/tenantDetailsPage/ContractionNews";
-import HeaderSection from "../components/tenantDetailsPage/headersection";
+import HeaderSection from "../components/tenantDetailsPage/HeaderSection";
 import CompanySummary from "../components/tenantDetailsPage/company_AI_summary";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
