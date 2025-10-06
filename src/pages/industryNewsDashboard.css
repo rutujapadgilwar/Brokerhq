@@ -1,0 +1,96 @@
+/* All the CSS from your original <style> tag goes here */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+}
+
+/* ... and so on for all your styles ... */
+
+.loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+    margin: 40px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.industry-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+.industry-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-color);
+}
+
+.healthcare { --accent-color: #e53e3e; }
+.technology { --accent-color: #3182ce; }
+.renewable { --accent-color: #38a169; }
+.logistics { --accent-color: #d69e2e; }
+.manufacturing { --accent-color: #805ad5; }
+.finance { --accent-color: #00b5d8; }
+.education { --accent-color: #f6ad55; }
+.agriculture { --accent-color: #68d391; }
+.construction { --accent-color: #ed8936; }
+.retail { --accent-color: #4299e1; }
+.transport { --accent-color: #9f7aea; }
+
+
+
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.metric { text-align: center; padding: 15px; background: #f7fafc; border-radius: 12px; }
+.metric-value { font-size: 1.5rem; font-weight: 700; color: var(--accent-color); margin-bottom: 5px; }
+.metric-label { font-size: 0.85rem; color: #718096; font-weight: 500; }
+
+.economic-context {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-top: 30px;
+}

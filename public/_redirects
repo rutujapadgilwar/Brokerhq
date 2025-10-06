@@ -1,0 +1,7 @@
+/* /index.html 200 
+
+# Netlify redirects for SPA
+/*    /index.html   200
+
+# Ensure images are served correctly
+/images/*  /images/:splat  200 
