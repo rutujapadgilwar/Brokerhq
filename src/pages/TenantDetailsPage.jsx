@@ -170,12 +170,13 @@ const TenantDetailsPage = () => {
   const [tenQData, setTenQData] = useState({ summary: [], url: null });
   const [eightkdata, setEightkdata] = useState([]);
   const [companyAISummary, setCompanyAISummary] = useState({ summary: "" });
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     const fetchTenant = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/tenants/${id}`);
+        const res = await fetch(`${backendUrl}/api/tenants/${id}`);
         if (!res.ok) {
           throw new Error(`Error ${res.status}: ${res.statusText}`);
         }
@@ -196,7 +197,7 @@ const TenantDetailsPage = () => {
     const fetchPropertyData = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/property_details/${id}`
+          `${backendUrl}/api/property_details/${id}`
         );
         if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
         const propertyData = await res.json();
@@ -326,7 +327,7 @@ const TenantDetailsPage = () => {
     async function fetchNews() {
       try {
         const newsRes = await fetch(
-          `http://127.0.0.1:8000/api/news_data/${id}`
+          `${backendUrl}/api/news_data/${id}`
         );
         const data = await newsRes.json();
         console.log(data);
@@ -344,7 +345,7 @@ const TenantDetailsPage = () => {
     async function fetchtenQ() {
       try {
         const tenqRes = await fetch(
-          `http://127.0.0.1:8000/api/tenq_summary/${id}`
+          `${backendUrl}/api/tenq_summary/${id}`
         );
         const data = await tenqRes.json();
         setTenQData(data || []);
@@ -361,7 +362,7 @@ const TenantDetailsPage = () => {
     async function fetcheightK() {
       try {
         const eightKres = await fetch(
-          `http://127.0.0.1:8000/api/eightk_data/${id}`
+          `${backendUrl}/api/eightk_data/${id}`
         );
         const data = await eightKres.json();
         setEightkdata(data || []);
@@ -378,7 +379,7 @@ const TenantDetailsPage = () => {
     async function fetchcomapnyAISummary() {
       try {
         const aiSummaryres = await fetch(
-          `http://127.0.0.1:8000/api/tenants/comapny_AI_summary/${id}`
+          `${backendUrl}/api/tenants/comapny_AI_summary/${id}`
         );
         const data = await aiSummaryres.json();
         console.log("company summary", data);
