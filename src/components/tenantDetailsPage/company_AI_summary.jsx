@@ -56,7 +56,7 @@ export default function CompanySummary({ data }) {
             avatar={<CheckCircle color="green" />}
             title={
               <Typography variant="h6" fontWeight={700} color="success.main">
-                Growth Indicators
+                Positive Indicators
               </Typography>
             }
           />
@@ -67,20 +67,21 @@ export default function CompanySummary({ data }) {
                 : []
               ).map((item, idx) => (
                 <Chip
-                  key={idx}
-                  label={item}
-                  color="success"
-                  variant="outlined"
-                  sx={{
-                    fontWeight: 500,
-                    whiteSpace: "normal", // allow wrapping
-                    height: "auto", // let chip grow vertically
-                    "& .MuiChip-label": {
-                      display: "block", // allow multi-line text
-                      whiteSpace: "normal",
-                    },
-                  }}
-                />
+  key={idx}
+  label={item}
+  variant="outlined"
+  sx={{
+    fontWeight: 500,
+    whiteSpace: "normal",
+    height: "auto",
+    color: "black",       // text color
+    borderColor: "black", // outline color
+    "& .MuiChip-label": {
+      display: "block",
+      whiteSpace: "normal",
+    },
+  }}
+/>
               ))}
             </Stack>
           </CardContent>
@@ -90,7 +91,7 @@ export default function CompanySummary({ data }) {
             avatar={<AlertTriangle color="orange" />}
             title={
               <Typography variant="h6" fontWeight={700} color="warning.main">
-                Pressure Indicators
+                Negative Indicators
               </Typography>
             }
           />
@@ -101,20 +102,21 @@ export default function CompanySummary({ data }) {
                 : []
               ).map((item, idx) => (
                 <Chip
-                  key={idx}
-                  label={item}
-                  color="warning"
-                  variant="outlined"
-                  sx={{
-                    fontWeight: 500,
-                    whiteSpace: "normal", // allow wrapping
-                    height: "auto", // let chip grow vertically
-                    "& .MuiChip-label": {
-                      display: "block", // allow multi-line text
-                      whiteSpace: "normal",
-                    },
-                  }}
-                />
+  key={idx}
+  label={item}
+  variant="outlined"
+  sx={{
+    fontWeight: 500,
+    whiteSpace: "normal",
+    height: "auto",
+    color: "black",       // text color
+    borderColor: "black", // outline color
+    "& .MuiChip-label": {
+      display: "block",
+      whiteSpace: "normal",
+    },
+  }}
+/>
               ))}
             </Stack>
           </CardContent>
@@ -167,96 +169,9 @@ export default function CompanySummary({ data }) {
         </CardContent>
       </Card>
       {/* Location Watch */}
-      <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 2 }}>
-        <CardHeader
-          avatar={<MapPin color="blue" />}
-          title={
-            <Typography variant="h6" fontWeight={700} color="primary">
-              Location Watch
-            </Typography>
-          }
-        />
-        <CardContent>
-          <Stack spacing={2}>
-            {/* Normalize locations into array */}
-            {(() => {
-              let locations = [];
-
-              // Case 1: Array of Key_Hubs
-              if (Array.isArray(summary?.Location_watch?.Key_Hubs)) {
-                locations = summary.Location_watch.Key_Hubs.map((loc) => ({
-                  label: [loc.City, loc.State, loc.Country]
-                    .filter(Boolean)
-                    .join(", "),
-                  role: loc.Functional_Role || loc.Role || null,
-                }));
-              }
-              // Case 2: Key_geographic_hubs (alt schema)
-              else if (
-                Array.isArray(summary?.Location_watch?.Key_geographic_hubs)
-              ) {
-                locations = summary.Location_watch.Key_geographic_hubs.map(
-                  (loc) => ({
-                    label: [loc.City, loc.State, loc.Country]
-                      .filter(Boolean)
-                      .join(", "),
-                    role: loc.Functional_Role || loc.Role || null,
-                  })
-                );
-              }
-              // Case 3: Object of place → role
-              else if (
-                summary?.Location_watch &&
-                typeof summary.Location_watch === "object"
-              ) {
-                locations = Object.entries(summary.Location_watch).map(
-                  ([place, data]) => {
-                    let role = null;
-
-                    if (typeof data === "string") {
-                      role = data;
-                    } else if (typeof data === "object") {
-                      role = data.Role || data.Functional_Role || null;
-                    }
-
-                    return { label: place, role };
-                  }
-                );
-              }
-
-              return locations.length > 0 ? (
-                locations.map((loc, idx) => (
-                  <Stack
-                    key={idx}
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                  >
-                    <Chip
-                      label={loc.label || "Unknown"}
-                      color="primary"
-                      variant="outlined"
-                      sx={{ fontWeight: 500 }}
-                    />
-                    {loc.role && (
-                      <Typography variant="body2" color="text.secondary">
-                        {loc.role}
-                      </Typography>
-                    )}
-                  </Stack>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  No location data available
-                </Typography>
-              );
-            })()}
-          </Stack>
-        </CardContent>
-      </Card>
 
       {/* Extra Layers — CRE Decision Drivers */}
-      <Card sx={{ borderRadius: 3, boxShadow: 2, mb: 4 }}>
+      {/* <Card sx={{ borderRadius: 3, boxShadow: 2, mb: 4 }}>
         <CardHeader
           avatar={<Layers color="purple" />}
           title={
@@ -329,7 +244,7 @@ export default function CompanySummary({ data }) {
               )}
           </Box>
         </CardContent>
-      </Card>
+      </Card> */}
     </Box>
   );
 }

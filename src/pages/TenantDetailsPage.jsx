@@ -150,13 +150,6 @@ const CardIcon = styled(Box)(({ theme, variant }) => ({
       : "linear-gradient(45deg, #667eea, #764ba2)",
 }));
 
-const ContactPerson = styled(Box)(({ theme }) => ({
-  background: "#f8fafc",
-  padding: theme.spacing(3),
-  borderRadius: 12,
-  marginBottom: theme.spacing(2),
-  position: "relative",
-}));
 
 const TenantDetailsPage = () => {
   const { id } = useParams();
@@ -171,7 +164,10 @@ const TenantDetailsPage = () => {
   const [eightkdata, setEightkdata] = useState([]);
   const [companyAISummary, setCompanyAISummary] = useState({ summary: "" });
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
+  const [leaseCounts, setLeaseCounts] = useState({
+  usTotal: 0,
+  nonUsTotal: 0,
+});
   useEffect(() => {
     const fetchTenant = async () => {
       setLoading(true);
@@ -248,6 +244,10 @@ const TenantDetailsPage = () => {
         const us = { upcoming: [], expired: [] };
         const nonUs = { upcoming: [], expired: [] };
 
+        setLeaseCounts({
+  usTotal: us.upcoming.length + us.expired.length,
+  nonUsTotal: nonUs.upcoming.length + nonUs.expired.length,
+});
         leaseList.forEach((lease) => {
           // Use clean_lease_expiration_date if available, otherwise fall back to original
           const dateString =

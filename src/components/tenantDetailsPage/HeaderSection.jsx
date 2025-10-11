@@ -20,53 +20,6 @@ import {
 
 export default function HeaderSection({ tenant, eightkData }) {
   if (!tenant) return null;
-
-  // Safely flatten all 8-K updates, ignoring empty or malformed entries
-  const updates = (Array.isArray(eightkData) ? eightkData : [eightkData])
-    .flatMap((item) => (Array.isArray(item?.filings) ? item.filings : []))
-    .flatMap((filing) =>
-      Array.isArray(filing?.extraction)
-        ? filing.extraction.map((update) => ({
-            Name:
-              update?.Name ||
-              update?.name ||
-              update?.officer ||
-              update?.person ||
-              "N/A",
-            Role_Affected:
-              update?.Role_Affected ||
-              update?.role ||
-              update?.position ||
-              "N/A",
-            Type_of_Change:
-              update?.Type_of_Change ||
-              update?.change ||
-              update?.action ||
-              "N/A",
-            Effective_Date:
-              update?.Effective_Date ||
-              update?.date ||
-              update?.effectiveDate ||
-              "N/A",
-            One_Line_Update:
-              update?.["One-Line_Update"] || // dash fix
-              update?.One_Line_Update ||
-              update?.summary ||
-              update?.update ||
-              "",
-            Notes:
-              update?.["Reason/Notes"] || update?.notes || update?.reason || "",
-            URL: update?.URL || update?.url || filing?.url || "#",
-          }))
-        : []
-    );
-  // Safe fallback for first filing URL
-  const firstFilingUrl = Array.isArray(eightkData)
-    ? eightkData
-        .flatMap((item) => (Array.isArray(item?.filings) ? item.filings : []))
-        .find((f) => Array.isArray(f?.extraction) && f.extraction.length)
-        ?.url || "#"
-    : "#";
   
   const getLatestJobCount = (jobCounts) => {
     if (!Array.isArray(jobCounts) || jobCounts.length === 0) return "N/A";
@@ -108,7 +61,7 @@ export default function HeaderSection({ tenant, eightkData }) {
               variant="h3"
               sx={{
                 fontWeight: 800,
-                background: "linear-gradient(90deg, #1d4ed8, #3b82f6)",
+                background: "#1d4ed8",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 mb: 1,

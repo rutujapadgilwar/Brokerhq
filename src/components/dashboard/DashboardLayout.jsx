@@ -111,6 +111,7 @@ const DashboardLayout = () => {
           py: 1,
           boxShadow: 1,
           marginTop: '64px',
+          borderRadius: '5px'
         }}
       >
         
@@ -120,19 +121,19 @@ const DashboardLayout = () => {
           <TextField
             placeholder={getSearchPlaceholder()}
             size="small"
-            sx={{ width: 300 }}
+            sx={{ width: 600 }}
             value={search} 
             onChange={e => setSearch(e.target.value)} 
             InputProps={{
               startAdornment: <SearchIcon sx={{ mr: 1, color: 'grey.500' }} />,
             }}
           />
-          <GradientButton
+          {/* <GradientButton
             startIcon={<ExportIcon />}
             sx={{ minWidth: 150 }}
           >
             {getExportButtonText()}
-          </GradientButton>
+          </GradientButton> */}
         </Box>
       </Box>
 

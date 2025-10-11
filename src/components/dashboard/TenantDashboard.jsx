@@ -99,7 +99,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
     const fetchTenantsAndLeases = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${backendUrl}/api/tenants`);
+        const res = await fetch(`${backendUrl}/tenants`);
         if (!res.ok) throw new Error("Failed to fetch tenants");
         const tenants = await res.json();
 
@@ -119,7 +119,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
 
             try {
               const propertyRes = await fetch(
-                `http://127.0.0.1:8000/api/property_details/${tenantId}`
+                `${backendUrl}/property_details/${tenantId}`
               );
 
               if (!propertyRes.ok) throw new Error("No property data");
@@ -364,7 +364,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         }}
       >
         {/* Content Header */}
-        <Paper
+        {/* <Paper
           sx={{
             bgcolor: "white",
             p: 2.5,
@@ -375,8 +375,8 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
             alignItems: "center",
             width: "100%",
           }}
-        >
-          <Box sx={{ display: "flex", gap: 3.75, alignItems: "center" }}>
+        > */}
+          {/* <Box sx={{ display: "flex", gap: 3.75, alignItems: "center" }}>
             <Typography variant="body2" sx={{ color: "grey.600" }}>
               {filteredData.length} tenants found
             </Typography>
@@ -415,8 +415,8 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                 </Typography>
               </Box>
             </Box>
-          </Box>
-          <Stack direction="row" spacing={1.25}>
+          </Box> */}
+          {/* <Stack direction="row" spacing={1.25}>
             <GradientButton
               variant={viewMode === "list" ? "contained" : "outlined"}
               startIcon={<ListIcon />}
@@ -449,8 +449,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
             >
               Map View
             </Button>
-          </Stack>
-        </Paper>
+          </Stack> */}
 
         {/* Content Area - Table or Map */}
         {viewMode === "list" ? (
@@ -719,14 +718,16 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                             <Chip
                               label={leaseExpiration ?? "--"}
                               size="small"
-                              color={
-                                Number(monthsUntilExpiration) < 6
-                                  ? "error"
-                                  : Number(monthsUntilExpiration) <= 15
-                                  ? "warning"
-                                  : "success"
-                              }
-                              sx={{ fontWeight: 500 }}
+                              // color={
+                              //   Number(monthsUntilExpiration) < 6
+                              //     ? "error"
+                              //     : Number(monthsUntilExpiration) <= 15
+                              //     ? "warning"
+                              //     : "success"
+                              // }
+                              sx={{ fontWeight: 500 ,
+                                color : "black"
+                              }}
                             />
                             <Typography
                               variant="caption"

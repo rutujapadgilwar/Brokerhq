@@ -6,12 +6,13 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   // Check initial saved state
   useEffect(() => {
   const checkIfSaved = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/watchlist?user_id=${userId}`);
+      const res = await fetch(`${backendUrl}/watchlist?user_id=${userId}`);
       if (res.ok) {
         const data = await res.json();
         const found = data.watchlist?.some(item => item.tenant_id === tenantId);
@@ -32,7 +33,7 @@ const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
     try {
       if (saved) {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/watchlist/${tenantId}?user_id=${userId}`,
+          `${backendUrl}/watchlist/${tenantId}?user_id=${userId}`,
           { method: "DELETE" }
         );
         if (res.ok) {
@@ -40,7 +41,7 @@ const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
           onStatusChange?.(false);
         }
       } else {
-        const res = await fetch("http://127.0.0.1:8000/api/watchlist", {
+        const res = await fetch(`${backend}/watchlist`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId, tenant_id: tenantId }),

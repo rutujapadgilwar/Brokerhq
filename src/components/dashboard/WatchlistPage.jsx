@@ -27,6 +27,7 @@ const WatchlistPage = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [message, setMessage] = useState(""); // ✅ success/error message
   const [openSnackbar, setOpenSnackbar] = useState(false); // ✅ Snackbar state
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const navigate = useNavigate();
 
@@ -42,7 +43,7 @@ const WatchlistPage = () => {
       const tenantDetails = await Promise.all(
         tenantIds.map(async (id) => {
           try {
-            const res = await fetch(`http://localhost:8000/api/tenants/${id}`);
+            const res = await fetch(`${backendUrl}/tenants/${id}`);
             if (!res.ok) return null;
             const data = await res.json();
             return data;
@@ -110,7 +111,7 @@ const WatchlistPage = () => {
   const handleDeleteSaved = async () => {
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/api/watchlist/${
+        `${backendUrl}/watchlist/${
           selectedRow.tenant_id || selectedRow._id
         }?user_id=brokerhq`,
         { method: "DELETE" }
