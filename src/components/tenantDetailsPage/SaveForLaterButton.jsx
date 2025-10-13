@@ -12,7 +12,7 @@ const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
   useEffect(() => {
   const checkIfSaved = async () => {
     try {
-      const res = await fetch(`${backendUrl}/watchlist?user_id=${userId}`);
+      const res = await fetch(`${backendUrl}/api/watchlist?user_id=${userId}`);
       if (res.ok) {
         const data = await res.json();
         const found = data.watchlist?.some(item => item.tenant_id === tenantId);
@@ -33,7 +33,7 @@ const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
     try {
       if (saved) {
         const res = await fetch(
-          `${backendUrl}/watchlist/${tenantId}?user_id=${userId}`,
+          `${backendUrl}/api/watchlist/${tenantId}?user_id=${userId}`,
           { method: "DELETE" }
         );
         if (res.ok) {
@@ -41,7 +41,7 @@ const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
           onStatusChange?.(false);
         }
       } else {
-        const res = await fetch(`${backend}/watchlist`, {
+        const res = await fetch(`${backend}/api/watchlist`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId, tenant_id: tenantId }),
