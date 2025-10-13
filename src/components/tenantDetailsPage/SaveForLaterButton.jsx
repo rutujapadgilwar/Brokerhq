@@ -41,7 +41,7 @@ const SaveForLaterButton = ({ tenantId, userId, onStatusChange }) => {
           onStatusChange?.(false);
         }
       } else {
-        const res = await fetch(`${backend}/api/watchlist`, {
+        const res = await fetch(`${backendUrl}/api/watchlist`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId, tenant_id: tenantId }),
