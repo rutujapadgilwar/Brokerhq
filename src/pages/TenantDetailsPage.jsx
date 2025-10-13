@@ -172,7 +172,7 @@ const TenantDetailsPage = () => {
     const fetchTenant = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${backendUrl}/api/tenants/${id}`);
+        const res = await fetch(`${backendUrl}/tenants/${id}`);
         if (!res.ok) {
           throw new Error(`Error ${res.status}: ${res.statusText}`);
         }
@@ -193,7 +193,7 @@ const TenantDetailsPage = () => {
     const fetchPropertyData = async () => {
       try {
         const res = await fetch(
-          `${backendUrl}/api/property_details/${id}`
+          `${backendUrl}/property_details/${id}`
         );
         if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
         const propertyData = await res.json();
@@ -327,7 +327,7 @@ const TenantDetailsPage = () => {
     async function fetchNews() {
       try {
         const newsRes = await fetch(
-          `${backendUrl}/api/news_data/${id}`
+          `${backendUrl}/news_data/${id}`
         );
         const data = await newsRes.json();
         console.log(data);
@@ -345,7 +345,7 @@ const TenantDetailsPage = () => {
     async function fetchtenQ() {
       try {
         const tenqRes = await fetch(
-          `${backendUrl}/api/tenq_summary/${id}`
+          `${backendUrl}/tenq_summary/${id}`
         );
         const data = await tenqRes.json();
         setTenQData(data || []);
@@ -362,7 +362,7 @@ const TenantDetailsPage = () => {
     async function fetcheightK() {
       try {
         const eightKres = await fetch(
-          `${backendUrl}/api/eightk_data/${id}`
+          `${backendUrl}/eightk_data/${id}`
         );
         const data = await eightKres.json();
         setEightkdata(data || []);
@@ -379,7 +379,7 @@ const TenantDetailsPage = () => {
     async function fetchcomapnyAISummary() {
       try {
         const aiSummaryres = await fetch(
-          `${backendUrl}/api/tenants/comapny_AI_summary/${id}`
+          `${backendUrl}/tenants/comapny_AI_summary/${id}`
         );
         const data = await aiSummaryres.json();
         console.log("company summary", data);
