@@ -99,7 +99,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
     const fetchTenantsAndLeases = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${backendUrl}/tenants`);
+        const res = await fetch(`${backendUrl}/api/tenants`);
         if (!res.ok) throw new Error("Failed to fetch tenants");
         const tenants = await res.json();
 
@@ -119,7 +119,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
 
             try {
               const propertyRes = await fetch(
-                `${backendUrl}/property_details/${tenantId}`
+                `${backendUrl}/api/property_details/${tenantId}`
               );
 
               if (!propertyRes.ok) throw new Error("No property data");
