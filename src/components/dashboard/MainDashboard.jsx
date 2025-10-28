@@ -429,48 +429,6 @@ const MainDashboard = () => {
               alignItems: 'center', 
               gap: 1.5, 
               p: 1.5, 
-              background: isActiveRoute('/tasks') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
-              backdropFilter: isActiveRoute('/tasks') ? 'blur(10px)' : 'none',
-              color: isActiveRoute('/tasks') ? 'white' : 'rgba(255,255,255,0.8)', 
-              fontSize: '14px', 
-              fontWeight: 500, 
-              borderRight: isActiveRoute('/tasks') ? '3px solid #fbbf24' : 'none',
-              cursor: 'pointer', 
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              borderRadius: '0 12px 12px 0',
-              marginRight: 2,
-              '&:hover': { 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
-                backdropFilter: 'blur(10px)',
-                color: 'white',
-                transform: 'translateX(4px)',
-              } 
-            }}
-            onClick={() => handleNavigation('/tasks')}
-          >
-            <CheckCircleIcon sx={{ fontSize: 16 }} />
-            <span>Tasks</span>
-            <Chip 
-              label="5" 
-              size="small" 
-              sx={{ 
-                background: 'linear-gradient(135deg, #ef4444, #f87171)',
-                color: 'white', 
-                fontSize: '10px', 
-                height: 20, 
-                ml: 'auto',
-                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
-                fontWeight: 600
-              }} 
-            />
-          </Box>
-          
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1.5, 
-              p: 1.5, 
               background: isActiveRoute('/watchlist') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/watchlist') ? 'blur(10px)' : 'none',
               color: isActiveRoute('/watchlist') ? 'white' : 'rgba(255,255,255,0.8)', 

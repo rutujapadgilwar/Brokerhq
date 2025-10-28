@@ -85,7 +85,10 @@ const ContractionNews = ({ newsData }) => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" sx={{ fontWeight: 700, mb: 2, color: "error.main" }}>
+      <Typography
+        variant="h5"
+        sx={{ fontWeight: 700, mb: 2, color: "error.main" }}
+      >
         🔻 Contraction News
       </Typography>
 
@@ -93,9 +96,15 @@ const ContractionNews = ({ newsData }) => {
       <Tabs
         value={tab}
         onChange={(e, newValue) => setTab(newValue)}
-        textColor="error"
-        indicatorColor="error"
-        sx={{ mb: 3 }}
+        textColor="primary"
+        indicatorColor="primary"
+        sx={{
+          mb: 3,
+          color: "error.main",
+          "& .MuiTabs-indicator": {
+            backgroundColor: "error.main",
+          },
+        }}
       >
         {categories.map((c, idx) => (
           <Tab

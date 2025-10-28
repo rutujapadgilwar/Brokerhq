@@ -46,8 +46,6 @@ import {
 import { styled } from '@mui/system';
 import Navbar from '../components/dashboard/Navbar';
 
-
-
 const WatchlistPage = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);

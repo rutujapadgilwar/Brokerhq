@@ -662,10 +662,11 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                           {/* Color bar */}
                           <TableCell
                             sx={{
-                              width: 12,
+                              width: 4,
                               p: 0,
                               background: rowcolor,
                               border: "none",
+                              borderRadius: 3,
                             }}
                           />
                           {/* Company & Industry */}
