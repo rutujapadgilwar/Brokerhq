@@ -34,7 +34,7 @@ const WatchlistPage = () => {
   const fetchWatchlistDetails = async () => {
     try {
       const watchlistRes = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/api/watchlist?user_id=brokerhq`
+        `${backendUrl}/api/watchlist?user_id=brokerhq`
       );
       if (!watchlistRes.ok) throw new Error("Failed to fetch watchlist");
       const watchlistData = await watchlistRes.json();
@@ -43,7 +43,7 @@ const WatchlistPage = () => {
       const tenantDetails = await Promise.all(
         tenantIds.map(async (id) => {
           try {
-            const res = await fetch(`${backendUrl}/tenants/${id}`);
+            const res = await fetch(`${backendUrl}/api/tenants/${id}`);
             if (!res.ok) return null;
             const data = await res.json();
             return data;

@@ -15,7 +15,8 @@ import BuyerDetailsPage from './pages/BuyerDetailsPage';
 import MainDashboard from './components/dashboard/MainDashboard';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import IndustryNewsDashboard from './pages/IndustryNewsDashboard';
-
+import UploadPage from './pages/uploadPage';
+import UploadedCsvDataPage from './pages/uploadedCsvDataPage';
 // Create a theme instance
 const theme = createTheme({
   palette: {
@@ -144,6 +145,8 @@ function App() {
         <Route path="/buyer/:id" element={<BuyerDetailsPage />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/industry" element={<IndustryNewsDashboard/>} />
+        <Route path="/upload" element={<UploadPage />}/>
+        <Route path='/getCsvData' element={<UploadedCsvDataPage/>}/>
       </Routes>
       {/* {isLoggedIn && <Chatbot />} */}
     </ThemeProvider>

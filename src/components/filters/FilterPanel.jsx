@@ -238,7 +238,9 @@ const FilterPanel = ({ selectedRole, onFilterChange }) => {
       {selectedRole === "tenant" && (
         <StyledAccordion defaultExpanded>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography>Tenant Type</Typography>
+            <Typography
+            sx={{ fontWeight: 600, color: theme.palette.text.primary }}
+          >Industry Type</Typography>
           </AccordionSummary>
           <AccordionDetails>
             <FormGroup>
@@ -266,7 +268,9 @@ const FilterPanel = ({ selectedRole, onFilterChange }) => {
       {/* Lease Term */}
       <StyledAccordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography>Lease Term</Typography>
+          <Typography
+            sx={{ fontWeight: 600, color: theme.palette.text.primary }}
+          >Lease Term</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <FormGroup>
