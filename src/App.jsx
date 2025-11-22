@@ -17,7 +17,7 @@ import DashboardLayout from './components/dashboard/DashboardLayout';
 import IndustryNewsDashboard from './pages/IndustryNewsDashboard';
 import UploadPage from './pages/uploadPage';
 import UploadedCsvDataPage from './pages/uploadedCsvDataPage';
-import PrivateCompanyDetailsPage from './pages/privateCompanyDetailsPage';
+import PrivateCompanyDetailsPage from './pages/PrivateCompanyDetailsPage';
 // Create a theme instance
 const theme = createTheme({
   palette: {
