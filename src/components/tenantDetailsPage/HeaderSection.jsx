@@ -45,16 +45,26 @@ export default function HeaderSection({ tenant, eightkData }) {
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
-            sx={{
-              bgcolor: "primary.main",
-              width: 72,
-              height: 72,
-              fontSize: 28,
-              fontWeight: 700,
-              boxShadow: 3,
-            }}
-          >
-            {tenant.tenant_name?.charAt(0) || "?"}
+              src={tenant?.logo_url || ""}
+              alt={tenant || tenant_name || "Company"}
+              sx={{
+                bgcolor: "primary.main",
+                width: 72,
+                height: 72,
+                fontSize: 28,
+                fontWeight: 700,
+              }}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = ""; 
+              }}
+            >
+            {tenant.tenant_name
+              ? tenant.tenant_name
+                  .split(" ")
+                  .map((n) => n.charAt(0).toUpperCase())
+                  .join("")
+              : "?"}
           </Avatar>
           <Box>
             <Typography

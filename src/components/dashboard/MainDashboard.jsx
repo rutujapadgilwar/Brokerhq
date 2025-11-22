@@ -32,6 +32,8 @@ import {
   ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import './MainDashboard.css';
+import Navbar from "./Navbar";
+
 
 const StyledCard = styled(Card)(({ theme }) => ({
   background: 'linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)',
@@ -255,9 +257,9 @@ const MainDashboard = () => {
       {/* Sidebar */}
       <Box sx={{ 
         width: 240, 
-        background: 'linear-gradient(180deg, rgba(30, 64, 175, 0.95) 0%, rgba(59, 130, 246, 0.9) 50%, rgba(37, 99, 235, 0.95) 100%)',
+        background: 'linear-gradient(180deg, rgba(246, 246, 248, 0.95) 0%, rgba(235, 239, 250, 0.9) 50%, rgba(249, 250, 250, 0.95) 100%)',
         backdropFilter: 'blur(20px)',
-        color: 'white', 
+        color: 'black', 
         display: 'flex', 
         flexDirection: 'column',
         borderRight: '1px solid rgba(255, 255, 255, 0.2)',
@@ -287,7 +289,10 @@ const MainDashboard = () => {
               fontWeight: 700, 
               mb: 1, 
               cursor: 'pointer',
-              background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
+              display: 'flex',          
+              alignItems: 'center',     
+              gap: 1,                  
+              background: 'linear-gradient(135deg, #0d0c0cff 0%, #25446eff 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
@@ -295,22 +300,16 @@ const MainDashboard = () => {
             }}
             onClick={() => handleNavigation('/dashboard')}
           >
-            🏢 BrokerHQ
+            <img 
+              src="/brokerhq_icon.png" 
+              alt="BrokerHQ Logo" 
+              style={{ height: 40, width: 40 }} 
+            />
+            BrokerHQ
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: '12px' }}>
-            <Box sx={{ 
-              width: 8, 
-              height: 8, 
-              background: 'linear-gradient(135deg, #10b981, #34d399)',
-              borderRadius: '50%', 
-              animation: 'pulse 2s infinite',
-              boxShadow: '0 0 12px rgba(16, 185, 129, 0.6)'
-            }} />
-            <span style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)' }}>AI Engine Active</span>
-          </Box>
         </Box>
         
-        <Box sx={{ flex: 1, py: 2.5, position: 'relative', zIndex: 1 }}>
+        <Box sx={{ flex: 1, position: 'relative', zIndex: 1 }}>
           <Box 
             sx={{ 
               display: 'flex', 
@@ -319,16 +318,15 @@ const MainDashboard = () => {
               p: 1.5, 
               background: isActiveRoute('/dashboard') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/dashboard') ? 'blur(10px)' : 'none',
-              color: 'white', 
+              color: 'black', 
               fontSize: '14px', 
               fontWeight: 500, 
-              borderRight: isActiveRoute('/dashboard') ? '3px solid #fbbf24' : 'none',
               cursor: 'pointer',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               borderRadius: '0 12px 12px 0',
               marginRight: 2,
               '&:hover': {
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(26, 24, 24, 0.15), rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(10px)',
                 transform: 'translateX(4px)',
               }
@@ -347,7 +345,7 @@ const MainDashboard = () => {
               p: 1.5, 
               background: isActiveRoute('/dashboard/properties') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/dashboard/properties') ? 'blur(10px)' : 'none',
-              color: isActiveRoute('/dashboard/properties') ? 'white' : 'rgba(255,255,255,0.8)', 
+              color: isActiveRoute('/dashboard/properties') ? 'black' : 'rgba(11, 10, 10, 0.8)', 
               fontSize: '14px', 
               fontWeight: 500, 
               borderRight: isActiveRoute('/dashboard/properties') ? '3px solid #fbbf24' : 'none',
@@ -356,9 +354,9 @@ const MainDashboard = () => {
               borderRadius: '0 12px 12px 0',
               marginRight: 2,
               '&:hover': { 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(26, 24, 24, 0.15), rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(10px)',
-                color: 'white',
+                color: 'black',
                 transform: 'translateX(4px)',
               } 
             }}
@@ -366,19 +364,6 @@ const MainDashboard = () => {
           >
             <FlagIcon sx={{ fontSize: 16 }} />
             <span>Prospecting</span>
-            <Chip 
-              label="12" 
-              size="small" 
-              sx={{ 
-                background: 'linear-gradient(135deg, #ef4444, #f87171)',
-                color: 'white', 
-                fontSize: '10px', 
-                height: 20, 
-                ml: 'auto',
-                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
-                fontWeight: 600
-              }} 
-            />
           </Box>
           
           <Box 
@@ -389,7 +374,7 @@ const MainDashboard = () => {
               p: 1.5, 
               background: isActiveRoute('/alerts') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/alerts') ? 'blur(10px)' : 'none',
-              color: isActiveRoute('/alerts') ? 'white' : 'rgba(255,255,255,0.8)', 
+              color: isActiveRoute('/alerts') ? 'black' : 'rgba(1, 1, 1, 0.8)', 
               fontSize: '14px', 
               fontWeight: 500, 
               borderRight: isActiveRoute('/alerts') ? '3px solid #fbbf24' : 'none',
@@ -398,9 +383,9 @@ const MainDashboard = () => {
               borderRadius: '0 12px 12px 0',
               marginRight: 2,
               '&:hover': { 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(26, 24, 24, 0.15) 0%, rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(10px)',
-                color: 'white',
+                color: 'black',
                 transform: 'translateX(4px)',
               } 
             }}
@@ -408,19 +393,6 @@ const MainDashboard = () => {
           >
             <WarningIcon sx={{ fontSize: 16 }} />
             <span>Alerts</span>
-            <Chip 
-              label="7" 
-              size="small" 
-              sx={{ 
-                background: 'linear-gradient(135deg, #ef4444, #f87171)',
-                color: 'white', 
-                fontSize: '10px', 
-                height: 20, 
-                ml: 'auto',
-                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
-                fontWeight: 600
-              }} 
-            />
           </Box>
           
           <Box 
@@ -431,7 +403,7 @@ const MainDashboard = () => {
               p: 1.5, 
               background: isActiveRoute('/watchlist') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/watchlist') ? 'blur(10px)' : 'none',
-              color: isActiveRoute('/watchlist') ? 'white' : 'rgba(255,255,255,0.8)', 
+              color: isActiveRoute('/watchlist') ? 'black' : 'rgba(4, 4, 4, 0.8)', 
               fontSize: '14px', 
               fontWeight: 500, 
               borderRight: isActiveRoute('/watchlist') ? '3px solid #fbbf24' : 'none',
@@ -440,9 +412,9 @@ const MainDashboard = () => {
               borderRadius: '0 12px 12px 0',
               marginRight: 2,
               '&:hover': { 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(26, 24, 24, 0.15) 0%, rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(10px)',
-                color: 'white',
+                color: 'black',
                 transform: 'translateX(4px)',
               } 
             }}
@@ -460,7 +432,7 @@ const MainDashboard = () => {
               p: 1.5, 
               background: isActiveRoute('/settings') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/settings') ? 'blur(10px)' : 'none',
-              color: isActiveRoute('/settings') ? 'white' : 'rgba(255,255,255,0.8)', 
+              color: isActiveRoute('/settings') ? 'black' : 'rgba(8, 8, 8, 0.8)', 
               fontSize: '14px', 
               fontWeight: 500, 
               borderRight: isActiveRoute('/settings') ? '3px solid #fbbf24' : 'none',
@@ -469,9 +441,9 @@ const MainDashboard = () => {
               borderRadius: '0 12px 12px 0',
               marginRight: 2,
               '&:hover': { 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(26, 24, 24, 0.15), rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(10px)',
-                color: 'white',
+                color: 'black',
                 transform: 'translateX(4px)',
               } 
             }}
@@ -489,7 +461,7 @@ const MainDashboard = () => {
               p: 1.5, 
               background: isActiveRoute('/settings') ? 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)' : 'transparent',
               backdropFilter: isActiveRoute('/settings') ? 'blur(10px)' : 'none',
-              color: isActiveRoute('/settings') ? 'white' : 'rgba(255,255,255,0.8)', 
+              color: isActiveRoute('/settings') ? 'black' : 'rgba(0, 0, 0, 0.8)', 
               fontSize: '14px', 
               fontWeight: 500, 
               borderRight: isActiveRoute('/settings') ? '3px solid #fbbf24' : 'none',
@@ -498,9 +470,9 @@ const MainDashboard = () => {
               borderRadius: '0 12px 12px 0',
               marginRight: 2,
               '&:hover': { 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                background: 'linear-gradient(135deg, rgba(26, 24, 24, 0.15) 0%, rgba(255,255,255,0.05) 100%)',
                 backdropFilter: 'blur(10px)',
-                color: 'white',
+                color: 'black',
                 transform: 'translateX(4px)',
               } 
             }}
@@ -515,6 +487,7 @@ const MainDashboard = () => {
       {/* Main Content */}
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
         {/* Top Bar */}
+        {/* <Navbar /> */}
         <Box sx={{ 
           background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
           backdropFilter: 'blur(20px)',
@@ -539,65 +512,7 @@ const MainDashboard = () => {
             AI Intelligence Dashboard
           </Typography>
           
-          <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 700, 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >
-                847
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>Intelligence Score</Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 700, 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >
-                12
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>Hot Prospects</Typography>
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 700, 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}
-              >
-                $2.4M
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 500 }}>Pipeline Value</Typography>
-            </Box>
-            <Chip 
-              label="23 New AI Insights" 
-              sx={{ 
-                background: 'linear-gradient(135deg, #ef4444, #f87171)',
-                color: 'white', 
-                fontSize: '11px', 
-                fontWeight: 600,
-                animation: 'glow 2s infinite alternate',
-                boxShadow: '0 4px 16px rgba(239, 68, 68, 0.3)',
-                backdropFilter: 'blur(10px)'
-              }} 
-            />
-          </Box>
+          
         </Box>
 
         {/* Dashboard Grid */}

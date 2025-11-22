@@ -102,7 +102,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         const res = await fetch(`${backendUrl}/api/tenants`);
         if (!res.ok) throw new Error("Failed to fetch tenants");
         const tenants = await res.json();
-
         const today = new Date();
 
         const processedTenants = await Promise.all(
@@ -468,6 +467,16 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                         verticalAlign: "top",
                       }}
                     >
+                      COMPANY LOGO
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        bgcolor: "grey.50",
+                        fontWeight: 600,
+                        color: "grey.900",
+                        verticalAlign: "top",
+                      }}
+                    >
                       COMPANY
                     </TableCell>
                     <TableCell
@@ -669,6 +678,43 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                               borderRadius: 3,
                             }}
                           />
+                          {/* Company Logo*/}
+                          <TableCell>
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                bgcolor: "grey.200",
+                              }}
+                            >
+                              {tenant.logo_url ? (
+                                <img
+                                  src={tenant.logo_url}
+                                  alt={tenant.tenant_name}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <Typography sx={{ fontWeight: 700, color: "grey.700" }}>
+                                  {tenant.tenant_name
+                                    ?.split(" ")
+                                    .map((word) => word[0])
+                                    .join("")
+                                    .slice(0, 2)
+                                    .toUpperCase()}
+                                </Typography>
+                              )}
+                            </Box>
+                          </TableCell>
+
                           {/* Company & Industry */}
                           <TableCell>
                             <Typography

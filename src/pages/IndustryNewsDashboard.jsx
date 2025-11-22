@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { TrendingUp, Building, ArrowUp, BarChart3 } from "lucide-react";
 import Navbar from '../components/dashboard/Navbar';
 import { useNavigate } from "react-router-dom";
-
-const API_URL = "http://127.0.0.1:8000/api/industryAnalysis";
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const API_URL = `${backendUrl}/api/industryAnalysis`;
 
 // Individual Industry Card
 const IndustryCard = ({ industryData, index }) => {
