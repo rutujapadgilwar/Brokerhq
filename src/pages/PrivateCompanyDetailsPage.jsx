@@ -61,11 +61,16 @@ export default function PrivateCompanyDetailsPage() {
     active_job_count,
     locations,
     about,
-    industry,
+    industry
   } = data.company_data;
+  const { lease_date,
+    city, 
+    state,
+    address,
+    sqft} = data || [];
+console.log(data);
   const imgUrl = data?.logo_url || "";
   const news = data?.news_data || [];
-  console.log(news);
 
   return (
     <Box sx={{ maxWidth: "1200px", mx: "auto", px: 3, py: 15 }}>
@@ -74,21 +79,21 @@ export default function PrivateCompanyDetailsPage() {
       {/* HEADER */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 5 }}>
         <Avatar
-        src={imgUrl}
-        alt={company}
-        sx={{
+          src={imgUrl}
+          alt={company}
+          sx={{
             bgcolor: "primary.main",
             width: 72,
             height: 72,
             fontSize: 28,
             fontWeight: 700,
-        }}
-        onError={(e) => {
+          }}
+          onError={(e) => {
             e.target.onerror = null;
             e.target.src = ""; // remove broken image
-        }}
+          }}
         >
-        {company
+          {company
             ? company
                 .split(" ")
                 .map((n) => n.charAt(0))
@@ -180,6 +185,21 @@ export default function PrivateCompanyDetailsPage() {
         )}
       </Box>
 
+      {/*Property Data From Uploaded CSV */}
+    <Box sx={{ mt: 6 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+          Property Data From Uploaded CSV
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Property Lease Expiration Date : {lease_date || ""}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Property Address : {address || ""}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Square Footage : {sqft || ""}
+        </Typography>
+      </Box>
       {/* NEWS SECTION */}
       <Box sx={{ mt: 6 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
@@ -198,19 +218,16 @@ export default function PrivateCompanyDetailsPage() {
               );
               if (filteredNews.length === 0) return null;
 
-              const sectionColor =
-                type === "Expansion"
-                  ? "green"
-                  : "red";
+              const sectionColor = type === "Expansion" ? "green" : "red";
 
               const gov_classificationColor = (type) =>
                 type === "Federal"
-                    ? "#14728e"   
-                    : type === "State"
-                    ? "#bbbb03ff"   
-                    : type === "Real Estate"
-                    ? "#ff9800"  
-                    : "#6c757d";
+                  ? "#14728e"
+                  : type === "State"
+                  ? "#bbbb03ff"
+                  : type === "Real Estate"
+                  ? "#ff9800"
+                  : "#6c757d";
 
               return (
                 <Grid item xs={12} key={type}>
@@ -225,7 +242,7 @@ export default function PrivateCompanyDetailsPage() {
                   >
                     {type} News
                   </Typography>
-                
+
                   <Grid container spacing={2}>
                     {filteredNews.map((item, idx) => (
                       <Grid item xs={12} sm={6} md={4} key={idx}>
@@ -237,33 +254,43 @@ export default function PrivateCompanyDetailsPage() {
                             height: "100%",
                             display: "flex",
                             flexDirection: "column",
-                            borderLeft: `3px solid ${gov_classificationColor(item.gov_classification)}`,
+                            borderLeft: `3px solid ${gov_classificationColor(
+                              item.gov_classification
+                            )}`,
                             transition: "0.3s",
                             "&:hover": {
-                            boxShadow: 6,
-                            transform: "translateY(-4px)",
+                              boxShadow: 6,
+                              transform: "translateY(-4px)",
                             },
-                        }}
-                        >                          
-                        {/* GOV TAG */}
-                        <Box
-                        sx={{
-                            fontSize: "11px",
-                            fontWeight: "bold",
-                            color: gov_classificationColor(item.gov_classification),
-                            lineHeight: 1,
-                        }}
+                          }}
                         >
-                        {(() => {
-                            const value = formatGov(item.gov_classification);
+                          {/* GOV TAG */}
+                          <Box
+                            sx={{
+                              fontSize: "11px",
+                              fontWeight: "bold",
+                              color: gov_classificationColor(
+                                item.gov_classification
+                              ),
+                              lineHeight: 1,
+                            }}
+                          >
+                            {(() => {
+                              const value = formatGov(item.gov_classification);
 
-                            if (!value || value === "N/A" || value === "None") {
-                            return "Other";
-                            }
+                              if (
+                                !value ||
+                                value === "N/A" ||
+                                value === "None"
+                              ) {
+                                return "Other";
+                              }
 
-                            return value.charAt(0).toUpperCase() + value.slice(1);
-                        })()}
-                        </Box>
+                              return (
+                                value.charAt(0).toUpperCase() + value.slice(1)
+                              );
+                            })()}
+                          </Box>
 
                           {/* TITLE */}
                           <MuiLink
@@ -289,20 +316,23 @@ export default function PrivateCompanyDetailsPage() {
                             Summary: {item.summary}
                           </Typography>
 
-                          <Typography variant="caption" color="blue" gutterBottom sx={{ bottom: 50, left: 8 }}>
+                          <Typography
+                            variant="caption"
+                            color="blue"
+                            gutterBottom
+                            sx={{ bottom: 50, left: 8 }}
+                          >
                             Source: {item.source || "Unknown"}
-                        </Typography>
+                          </Typography>
 
- 
-
-  {/* Date on the right */}
-  <Typography
-    variant="caption"
-    color="text.secondary"
-    title="published_date"
-  >
-    {new Date(item.published).toLocaleDateString()}
-  </Typography>
+                          {/* Date on the right */}
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            title="published_date"
+                          >
+                            {new Date(item.published).toLocaleDateString()}
+                          </Typography>
                         </Box>
                       </Grid>
                     ))}
