@@ -17,6 +17,7 @@ import DashboardLayout from './components/dashboard/DashboardLayout';
 import IndustryNewsDashboard from './pages/IndustryNewsDashboard';
 import UploadPage from './pages/uploadPage';
 import UploadedCsvDataPage from './pages/uploadedCsvDataPage';
+import PrivateCompanyDetailsPage from './pages/privateCompanyDetailsPage';
 // Create a theme instance
 const theme = createTheme({
   palette: {
@@ -147,6 +148,7 @@ function App() {
         <Route path="/industry" element={<IndustryNewsDashboard/>} />
         <Route path="/upload" element={<UploadPage />}/>
         <Route path='/getCsvData' element={<UploadedCsvDataPage/>}/>
+        <Route path="/private_company/:id" element={<PrivateCompanyDetailsPage/>}/>
       </Routes>
       {/* {isLoggedIn && <Chatbot />} */}
     </ThemeProvider>

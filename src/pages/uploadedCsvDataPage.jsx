@@ -15,7 +15,10 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import axios from "axios";
 import Navbar from "../components/dashboard/Navbar";
+import { useNavigate } from "react-router-dom";
+import { styled } from "@mui/material/styles";
 
 export default function UploadedCsvDataPage() {
   const [data, setData] = useState([]);
@@ -26,6 +29,7 @@ export default function UploadedCsvDataPage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const userId = "brokerhq"; // ⚙️ Replace with your actual logged-in user ID
+  const [message, setMessage] = useState("");
 
   // Fetch upload history
   useEffect(() => {
@@ -52,6 +56,7 @@ export default function UploadedCsvDataPage() {
         );
         if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
         const result = await res.json();
+        console.log(result);
         setData(result || []);
       } catch (err) {
         console.error("❌ Error fetching uploaded data:", err);
@@ -120,11 +125,39 @@ export default function UploadedCsvDataPage() {
     }
   };
 
+  const StyledTableRow = styled(TableRow)({
+    cursor: "pointer",
+  });
+  const fetchCompanyInfoAgent = async () => {
+    try {
+      setLoading(true);
+      setMessage("");
+
+      const response = await axios.post(
+        `${backendUrl}/auto-process-to-fetch-private-company-info`
+      );
+
+      setMessage(response.data.message || "Process completed!");
+    } catch (error) {
+      setMessage("❌ Error processing company data.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const navigate = useNavigate();
+
+  const handleRowClick = (id) => {
+    if (!id) return console.error("❌ company_id missing", id);
+    navigate(`/private_company/${id}`);
+  };
+
   return (
     <Box sx={{ p: 4 }}>
-    <Navbar/>
+      <Navbar />
       <Typography variant="h4" gutterBottom fontWeight={700} sx={{ mt: 6 }}>
-        📋 Uploaded CSV Data
+        📋 My Data
       </Typography>
 
       {/* --- UPLOAD HISTORY CARDS --- */}
@@ -154,10 +187,17 @@ export default function UploadedCsvDataPage() {
                   alignItems: "center",
                 }}
               >
-                <Typography variant="h6">{h.date}</Typography>
+                {/* PUBLISH DATE TOP-RIGHT */}
+                <Typography
+                  color="text.secondary"
+                  
+                >
+                  {new Date(h.uploadedAt).toLocaleDateString()}
+                </Typography>
                 <Button
                   size="small"
                   color="error"
+                  variant="contained"
                   onClick={() => deleteDataForDate(h.uploadedAt)}
                 >
                   Delete All
@@ -176,9 +216,50 @@ export default function UploadedCsvDataPage() {
           ))
         )}
       </Box>
+      <Box>
+        <div>
+          <Button
+            fullWidth={false}
+            variant="contained"
+            onClick={fetchCompanyInfoAgent}
+            disabled={loading}
+            sx={{
+              mt: 2,
+              px: 3,
+              py: 1.2,
+              borderRadius: "8px",
+              fontWeight: 600,
+              textTransform: "none",
+              letterSpacing: "0.5px",
+              backgroundColor: loading ? "grey.400" : "primary.main",
+              boxShadow: loading
+                ? "none"
+                : "0 4px 10px rgba(25, 118, 210, 0.3)",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                backgroundColor: loading ? "grey.400" : "primary.dark",
+                transform: loading ? "none" : "translateY(-2px)",
+                boxShadow: loading
+                  ? "none"
+                  : "0 6px 14px rgba(25, 118, 210, 0.4)",
+              },
+            }}
+          >
+            {loading ? "Processing..." : "Fetch Company’s Information"}
+          </Button>
 
-      {/* --- DEFAULT DATA TABLE --- */}
-      <Paper sx={{ mt: 6, p: 2, overflowX: "auto" }}>
+          {message && <p style={{ marginTop: "10px" }}>{message}</p>}
+        </div>
+      </Box>
+      <Paper
+        sx={{
+          mt: 6,
+          p: 2,
+          overflowX: "auto",
+          borderRadius: 3,
+          boxShadow: 3,
+        }}
+      >
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
             <CircularProgress />
@@ -190,25 +271,62 @@ export default function UploadedCsvDataPage() {
         ) : (
           <Table>
             <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold" }}>Company Name</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>Address</TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Lease Expiration Date
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold" }}>
-                  Square Footage
-                </TableCell>
+              <TableRow
+                sx={{
+                  backgroundColor: "#f5f5f5",
+                }}
+              >
+                {[
+                  "COMPANY NAME",
+                  "ADDRESS",
+                  "CITY",
+                  "STATE",
+                  "LEASE EXPIRATION DATE",
+                  "SQUARE FOOTAGE",
+                ].map((header) => (
+                  <TableCell
+                    key={header}
+                    sx={{
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                      color: "#333",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {data.map((row, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{row["company"] || "—"}</TableCell>
-                  <TableCell>{row["address"] || "—"}</TableCell>
-                  <TableCell>{row["lease_date"] || "—"}</TableCell>
-                  <TableCell>{row["sqft"] || "—"}</TableCell>
-                </TableRow>
+                <StyledTableRow
+                  key={row._id || idx}
+                  onClick={() => handleRowClick(row._id)}
+                  sx={{
+                    cursor: "pointer",
+                    "&:hover": { backgroundColor: "#f9f9f9" },
+                    width: 4,
+                    p: 0,
+                    border: "none",
+                    borderRadius: 3,
+                  }}
+                >
+                  {/* Company Name - link look */}
+                  <TableCell
+                    sx={{
+                      color: "#1976d2",
+                      fontWeight: 500,
+                      "&:hover": {},
+                    }}
+                  >
+                    {row.company || "—"}
+                  </TableCell>
+                  <TableCell>{row.address || "—"}</TableCell>
+                  <TableCell>{row.city || "—"}</TableCell>
+                  <TableCell>{row.state || "—"}</TableCell>
+                  <TableCell>{row.lease_date || "—"}</TableCell>
+                  <TableCell>{row.sqft || "—"}</TableCell>
+                </StyledTableRow>
               ))}
             </TableBody>
           </Table>
@@ -234,6 +352,8 @@ export default function UploadedCsvDataPage() {
                     Company Name
                   </TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>Address</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>City</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>State</TableCell>
                   <TableCell sx={{ fontWeight: "bold" }}>
                     Lease Expiration Date
                   </TableCell>
@@ -247,6 +367,8 @@ export default function UploadedCsvDataPage() {
                   <TableRow key={idx}>
                     <TableCell>{row["company"] || "—"}</TableCell>
                     <TableCell>{row["address"] || "—"}</TableCell>
+                    <TableCell>{row["city"] || "—"}</TableCell>
+                    <TableCell>{row["state"] || "—"}</TableCell>
                     <TableCell>{row["lease_date"] || "—"}</TableCell>
                     <TableCell>{row["sqft"] || "—"}</TableCell>
                   </TableRow>

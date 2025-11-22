@@ -31,6 +31,7 @@ import ExpansionNews from "../components/tenantDetailsPage/ExpansionNews";
 import ContractionNews from "../components/tenantDetailsPage/ContractionNews";
 import HeaderSection from "../components/tenantDetailsPage/HeaderSection";
 import CompanySummary from "../components/tenantDetailsPage/company_AI_summary";
+import NonUsLeasesSection from "../components/tenantDetailsPage/NonUsLeasesSection";
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 const usStates = [
@@ -150,7 +151,6 @@ const CardIcon = styled(Box)(({ theme, variant }) => ({
       : "linear-gradient(45deg, #667eea, #764ba2)",
 }));
 
-
 const TenantDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -165,231 +165,258 @@ const TenantDetailsPage = () => {
   const [companyAISummary, setCompanyAISummary] = useState({ summary: "" });
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [leaseCounts, setLeaseCounts] = useState({
-  usTotal: 0,
-  nonUsTotal: 0,
-});
+    usTotal: 0,
+    nonUsTotal: 0,
+  });
+  // useEffect(() => {
+  //   const fetchAllData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       console.time("Total Fetch");
+
+  //       console.time("Tenant Fetch");
+  //       const tenantRes = await fetch(`${backendUrl}/api/tenants/${id}`);
+  //       const tenantData = await tenantRes.json();
+  //       console.timeEnd("Tenant Fetch");
+
+  //       console.time("Property Fetch");
+  //       const propertyRes = await fetch(
+  //         `${backendUrl}/api/property_details/${id}`
+  //       );
+  //       const propertyData = await propertyRes.json();
+  //       console.timeEnd("Property Fetch");
+
+  //       console.time("News Fetch");
+  //       const newsData = await fetch(`${backendUrl}/api/news_data/${id}`).then(
+  //         (res) => res.json()
+  //       );
+  //       console.timeEnd("News Fetch");
+
+  //       console.time("10-Q Fetch");
+  //       const tenQData = await fetch(
+  //         `${backendUrl}/api/tenq_summary/${id}`
+  //       ).then((res) => res.json());
+  //       console.timeEnd("10-Q Fetch");
+
+  //       console.time("8-K Fetch");
+  //       const eightKData = await fetch(
+  //         `${backendUrl}/api/eightk_data/${id}`
+  //       ).then((res) => res.json());
+  //       console.timeEnd("8-K Fetch");
+
+  //       console.time("AI Fetch");
+  //       const aiData = await fetch(
+  //         `${backendUrl}/api/tenants/comapny_AI_summary/${id}`
+  //       ).then((res) => res.json());
+  //       console.timeEnd("AI Fetch");
+
+  //       console.timeEnd("Total Fetch");
+
+  //       // Set states
+  //       setTenant(tenantData);
+  //       setNewsData(newsData);
+  //       setTenQData(tenQData || []);
+  //       setEightkdata(eightKData || []);
+  //       setCompanyAISummary(aiData && aiData.summary ? aiData : null);
+
+  //       // Process property data
+  //       if (propertyData) {
+  //         console.time("Lease Processing");
+
+  //         const leaseCounts = propertyData?.lease_counts || {
+  //           usTotal: 0,
+  //           nonUsTotal: 0,
+  //           total: 0,
+  //         };
+  //         setLeaseCounts({
+  //           usTotal: leaseCounts.usTotal,
+  //           nonUsTotal: leaseCounts.nonUsTotal,
+  //           total: leaseCounts.total,
+  //         });
+
+  //         const allReports = propertyData?.data?.[0]?.All_Reports || {};
+  //         let leaseList = [];
+  //         Object.values(allReports).forEach((reports) => {
+  //           reports.forEach((report) => {
+  //             if (Array.isArray(report.Leases) && report.Leases.length > 0) {
+  //               const filtered = report.Leases.filter(
+  //                 (l) => l["Real Estate Property"] === "Yes"
+  //               ).map((l) => ({
+  //                 ...l,
+  //                 filingDate: report["Filing Date"],
+  //                 url: report["URL"],
+  //               }));
+  //               leaseList = [...leaseList, ...filtered];
+  //             }
+  //           });
+  //         });
+  //         setLeases(leaseList);
+
+  //         // Split and sort leases
+  //         const us = { upcoming: [], expired: [] };
+  //         const nonUs = { upcoming: [], expired: [] };
+  //         leaseList.forEach((lease) => {
+  //           const dateString =
+  //             lease["clean_lease_expiration_date"] ||
+  //             lease["Lease Expiration Date"];
+  //           if (
+  //             !dateString ||
+  //             dateString.trim() === "" ||
+  //             dateString === "null"
+  //           )
+  //             return;
+
+  //           const leaseDate = new Date(dateString);
+  //           if (isNaN(leaseDate.getTime())) return;
+
+  //           const target = isUSAddress(lease["Lease Property Address"])
+  //             ? us
+  //             : nonUs;
+  //           if (leaseDate >= new Date()) target.upcoming.push(lease);
+  //           else target.expired.push(lease);
+  //         });
+
+  //         const sortByDate = (arr) =>
+  //           arr.sort(
+  //             (a, b) =>
+  //               new Date(
+  //                 a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
+  //               ) -
+  //               new Date(
+  //                 b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
+  //               )
+  //           );
+
+  //         setUsLeases({
+  //           upcoming: sortByDate(us.upcoming),
+  //           expired: sortByDate(us.expired),
+  //         });
+  //         setNonUsLeases({
+  //           upcoming: sortByDate(nonUs.upcoming),
+  //           expired: sortByDate(nonUs.expired),
+  //         });
+
+  //         console.timeEnd("Lease Processing");
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching all data:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchAllData();
+  // }, [id]);
+
   useEffect(() => {
-    const fetchTenant = async () => {
+    // 1. Fast tenant + property fetch
+    const fetchTenantAndProperty = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${backendUrl}/api/tenants/${id}`);
-        if (!res.ok) {
-          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        const [tenantRes, propertyRes] = await Promise.all([
+          fetch(`${backendUrl}/api/tenants/${id}`),
+          fetch(`${backendUrl}/api/property_details/${id}`),
+        ]);
+        const [tenantData, propertyData] = await Promise.all([
+          tenantRes.json(),
+          propertyRes.json(),
+        ]);
+        setTenant(tenantData);
+
+        if (propertyData) {
+          const leaseCounts = propertyData?.lease_counts || {
+            usTotal: 0,
+            nonUsTotal: 0,
+            total: 0,
+          };
+          setLeaseCounts(leaseCounts);
+
+          const allReports = propertyData?.data?.[0]?.All_Reports || {};
+          let leaseList = [];
+          Object.values(allReports).forEach((reports) =>
+            reports.forEach((report) => {
+              if (Array.isArray(report.Leases)) {
+                leaseList.push(
+                  ...report.Leases.filter(
+                    (l) => l["Real Estate Property"] === "Yes"
+                  ).map((l) => ({
+                    ...l,
+                    filingDate: report["Filing Date"],
+                    url: report["URL"],
+                  }))
+                );
+              }
+            })
+          );
+          setLeases(leaseList);
+
+          const us = { upcoming: [], expired: [] };
+          const nonUs = { upcoming: [], expired: [] };
+
+          leaseList.forEach((lease) => {
+            const dateString =
+              lease["clean_lease_expiration_date"] ||
+              lease["Lease Expiration Date"];
+            if (!dateString || dateString === "null") return;
+
+            const leaseDate = new Date(dateString);
+            if (isNaN(leaseDate.getTime())) return;
+
+            const target = isUSAddress(lease["Lease Property Address"])
+              ? us
+              : nonUs;
+            if (leaseDate >= new Date()) target.upcoming.push(lease);
+            else target.expired.push(lease);
+          });
+
+          const sortByDate = (arr) =>
+            arr.sort(
+              (a, b) =>
+                new Date(
+                  a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
+                ) -
+                new Date(
+                  b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
+                )
+            );
+
+          setUsLeases({
+            upcoming: sortByDate(us.upcoming),
+            expired: sortByDate(us.expired),
+          });
+          setNonUsLeases({
+            upcoming: sortByDate(nonUs.upcoming),
+            expired: sortByDate(nonUs.expired),
+          });
         }
-        const data = await res.json();
-        setTenant(data);
-      } catch (error) {
-        console.error("Error fetching tenant:", error);
-        setTenant(null);
+      } catch (err) {
+        console.error("Tenant/Property fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTenant();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchPropertyData = async () => {
-      try {
-        const res = await fetch(
-          `${backendUrl}/api/property_details/${id}`
-        );
-        if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
-        const propertyData = await res.json();
-
-        // Extract all leases across reports
-        const allReports = propertyData?.data?.[0]?.All_Reports || {};
-        let leaseList = [];
-        let officerSet = new Set();
-        Object.values(allReports).forEach((reports) => {
-          reports.forEach((report) => {
-            (report["Executive Officers"] || []).forEach((name) =>
-              officerSet.add(name)
-            );
-
-            if (Array.isArray(report.Leases) && report.Leases.length > 0) {
-              const filtered = report.Leases.filter((lease) => {
-                const isRealEstate = lease["Real Estate Property"] === "Yes";
-
-                // Check if lease expiration date exists and is not null/empty
-                const hasValidExpirationDate =
-                  lease["Lease Expiration Date"] &&
-                  lease["Lease Expiration Date"].trim() !== "" &&
-                  lease["Lease Expiration Date"] !== "null" &&
-                  lease["Lease Expiration Date"] !== null;
-
-                // Also check clean_lease_expiration_date if it exists
-                const hasValidCleanDate =
-                  lease["clean_lease_expiration_date"] &&
-                  lease["clean_lease_expiration_date"].trim() !== "" &&
-                  lease["clean_lease_expiration_date"] !== null &&
-                  lease["clean_lease_expiration_date"] !== null;
-
-                return (
-                  isRealEstate && (hasValidExpirationDate || hasValidCleanDate)
-                );
-              }).map((lease) => ({
-                ...lease,
-                filingDate: report["Filing Date"], // attach filing date
-                url: report["URL"], // attach document URL
-              }));
-
-              leaseList = [...leaseList, ...filtered];
-            }
-          });
-        });
-
-        setLeases(leaseList);
-        const us = { upcoming: [], expired: [] };
-        const nonUs = { upcoming: [], expired: [] };
-
-        setLeaseCounts({
-  usTotal: us.upcoming.length + us.expired.length,
-  nonUsTotal: nonUs.upcoming.length + nonUs.expired.length,
-});
-        leaseList.forEach((lease) => {
-          // Use clean_lease_expiration_date if available, otherwise fall back to original
-          const dateString =
-            lease["clean_lease_expiration_date"] ||
-            lease["Lease Expiration Date"];
-
-          // Skip if still no valid date
-          if (
-            !dateString ||
-            dateString.trim() === "" ||
-            dateString === "null"
-          ) {
-            return;
-          }
-          let leaseDate;
-          try {
-            if (
-              dateString.includes("-") &&
-              dateString.split("-").length === 3
-            ) {
-              // Format: YYYY-MM-DD
-              leaseDate = new Date(
-                dateString + (dateString.split("-").length === 2 ? "-01" : "")
-              );
-            } else {
-              // Try parsing as is
-              leaseDate = new Date(dateString);
-            }
-
-            // Check if date is valid
-            if (isNaN(leaseDate.getTime())) {
-              return; // Skip invalid dates
-            }
-          } catch (error) {
-            console.warn("Failed to parse date:", dateString);
-            return; // Skip unparseable dates
-          }
-          const target = isUSAddress(lease["Lease Property Address"])
-            ? us
-            : nonUs;
-
-          if (leaseDate >= new Date()) target.upcoming.push(lease);
-          else target.expired.push(lease);
-        });
-
-        // Optional: sort by expiration date
-        const sortByDate = (arr) =>
-          arr.sort((a, b) => {
-            const getDate = (lease) => {
-              const dateString =
-                lease["clean_lease_expiration_date"] ||
-                lease["Lease Expiration Date"];
-              return new Date(dateString);
-            };
-            return getDate(a) - getDate(b);
-          });
-
-        setUsLeases({
-          upcoming: sortByDate(us.upcoming),
-          expired: sortByDate(us.expired),
-        });
-
-        setNonUsLeases({
-          upcoming: sortByDate(nonUs.upcoming),
-          expired: sortByDate(nonUs.expired),
-        });
-      } catch (error) {
-        console.error("Error fetching property data:", error);
-      }
+    // 2. Heavy data fetch in background (async, no await)
+    const fetchHeavyData = () => {
+      Promise.all([
+        fetch(`${backendUrl}/api/news_data/${id}`).then((res) => res.json()),
+        fetch(`${backendUrl}/api/tenq_summary/${id}`).then((res) => res.json()),
+        fetch(`${backendUrl}/api/eightk_data/${id}`).then((res) => res.json()),
+        fetch(`${backendUrl}/api/tenants/comapny_AI_summary/${id}`).then(
+          (res) => res.json()
+        ),
+      ])
+        .then(([newsData, tenQData, eightKData, aiData]) => {
+          setNewsData(newsData);
+          setTenQData(tenQData || []);
+          setEightkdata(eightKData || []);
+          setCompanyAISummary(aiData?.summary ? aiData : null);
+        })
+        .catch((err) => console.error("Heavy data fetch error:", err));
     };
 
-    fetchPropertyData();
-  }, [id]);
-
-  //News Data
-  useEffect(() => {
-    async function fetchNews() {
-      try {
-        const newsRes = await fetch(
-          `${backendUrl}/api/news_data/${id}`
-        );
-        const data = await newsRes.json();
-        console.log(data);
-        setNewsData(data);
-      } catch (err) {
-        console.error("Error fetching news", err);
-      }
-    }
-
-    fetchNews();
-  }, [id]);
-
-  //tenq_summary
-  useEffect(() => {
-    async function fetchtenQ() {
-      try {
-        const tenqRes = await fetch(
-          `${backendUrl}/api/tenq_summary/${id}`
-        );
-        const data = await tenqRes.json();
-        setTenQData(data || []);
-      } catch (err) {
-        console.error("Error fetching tenq data", err);
-      }
-    }
-
-    fetchtenQ();
-  }, [id]);
-
-  //eightk data
-  useEffect(() => {
-    async function fetcheightK() {
-      try {
-        const eightKres = await fetch(
-          `${backendUrl}/api/eightk_data/${id}`
-        );
-        const data = await eightKres.json();
-        setEightkdata(data || []);
-      } catch (err) {
-        console.error("Error fetching eightk data", err);
-      }
-    }
-
-    fetcheightK();
-  }, [id]);
-
-  //Company AI summary
-  useEffect(() => {
-    async function fetchcomapnyAISummary() {
-      try {
-        const aiSummaryres = await fetch(
-          `${backendUrl}/api/tenants/comapny_AI_summary/${id}`
-        );
-        const data = await aiSummaryres.json();
-        console.log("company summary", data);
-        setCompanyAISummary(data && data.summary ? data : null);
-      } catch (err) {
-        console.error("Error fetching company AI summary data", err);
-      }
-    }
-
-    fetchcomapnyAISummary();
+    fetchTenantAndProperty();
+    fetchHeavyData();
   }, [id]);
 
   if (loading) {
@@ -421,7 +448,6 @@ const TenantDetailsPage = () => {
       </Box>
     );
   }
-
   // Safely flatten all 8-K updates, ignoring empty or malformed entries
   const updates = (Array.isArray(eightkdata) ? eightkdata : [eightkdata])
     .flatMap((item) => (Array.isArray(item?.filings) ? item.filings : []))
@@ -592,59 +618,62 @@ const TenantDetailsPage = () => {
                       </Box>
                     )}
 
-                    {Array.isArray(tenQData?.summary) && tenQData.summary.map((item, index) => (
-                      <ListItem
-                        key={index}
-                        sx={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          flexDirection: "column",
-                          mb: 2,
-                          p: 2,
-                          borderRadius: "12px",
-                          bgcolor: "#ffffff",
-                          boxShadow: 1,
-                          transition: "all 0.2s ease-in-out",
-                          "&:hover": {
-                            transform: "translateY(-2px)",
-                            boxShadow: 3,
-                            bgcolor: "#f1f5f9",
-                          },
-                        }}
-                      >
-                        {/* Summary Point */}
-                        <Typography
-                          variant="body1"
-                          sx={{ fontWeight: 600, color: "#0f172a", mb: 1 }}
-                        >
-                          • {item.summary_point}
-                        </Typography>
-
-                        {/* Details */}
-                        <Typography
-                          variant="body2"
+                    {Array.isArray(tenQData?.summary) &&
+                      tenQData.summary.map((item, index) => (
+                        <ListItem
+                          key={index}
                           sx={{
-                            color: "#475569",
-                            lineHeight: 1.5,
-                            mb: 0.5,
+                            display: "flex",
+                            alignItems: "flex-start",
+                            flexDirection: "column",
+                            mb: 2,
+                            p: 2,
+                            borderRadius: "12px",
+                            bgcolor: "#ffffff",
+                            boxShadow: 1,
+                            transition: "all 0.2s ease-in-out",
+                            "&:hover": {
+                              transform: "translateY(-2px)",
+                              boxShadow: 3,
+                              bgcolor: "#f1f5f9",
+                            },
                           }}
                         >
-                          <strong style={{ color: "#2563eb" }}>Details:</strong>{" "}
-                          {item.details}
-                        </Typography>
+                          {/* Summary Point */}
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 600, color: "#0f172a", mb: 1 }}
+                          >
+                            • {item.summary_point}
+                          </Typography>
 
-                        {/* Implications */}
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "#475569", lineHeight: 1.5 }}
-                        >
-                          <strong style={{ color: "#16a34a" }}>
-                            Implications:
-                          </strong>{" "}
-                          {item.implications}
-                        </Typography>
-                      </ListItem>
-                    ))}
+                          {/* Details */}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "#475569",
+                              lineHeight: 1.5,
+                              mb: 0.5,
+                            }}
+                          >
+                            <strong style={{ color: "#2563eb" }}>
+                              Details:
+                            </strong>{" "}
+                            {item.details}
+                          </Typography>
+
+                          {/* Implications */}
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "#475569", lineHeight: 1.5 }}
+                          >
+                            <strong style={{ color: "#16a34a" }}>
+                              Implications:
+                            </strong>{" "}
+                            {item.implications}
+                          </Typography>
+                        </ListItem>
+                      ))}
                   </List>
                 </CardContent>
               </StyledCard>
@@ -1296,95 +1325,100 @@ const TenantDetailsPage = () => {
 
           {/* Sidebar */}
           <Grid item xs={12} lg={4}>
-  <Box
-    sx={{
-      display: "grid",
-      gap: 3,
-      height: "fit-content",
-      position: "sticky",
-      top: 32,
-    }}
-  >
-    {/* Executive Officer Changes */}
-    <StyledCard>
-      <CardHeader
-        avatar={<CardIcon variant="contacts">👥</CardIcon>}
-        title="Executive Officer Changes"
-        titleTypographyProps={{ variant: "h6", fontWeight: 700 }}
-      />
-      <CardContent>
-        {Array.isArray(updates) && updates.length > 0 ? (
-          <Grid container spacing={2}>
-            {updates.map((update, index) => (
-              <Grid item xs={12} key={index}>
-                {/* 👇 Wrap with CardActionArea */}
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    boxShadow: 2,
-                    transition: "transform 0.3s, box-shadow 0.3s",
-                    "&:hover": {
-                      transform: "translateY(-4px)",
-                      boxShadow: 6,
-                    },
-                  }}
-                >
-                  <CardActionArea
-                    component="a"
-                    href={update?.URL || "#"} // 👈 per-update URL
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ p: 2 }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      {/* Left: Name + Role */}
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {update?.Name || "N/A"}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {update?.Role_Affected || "N/A"}
-                        </Typography>
-                      </Box>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 3,
+                height: "fit-content",
+                position: "sticky",
+                top: 32,
+              }}
+            >
+              {/* Executive Officer Changes */}
+              <StyledCard>
+                <CardHeader
+                  avatar={<CardIcon variant="contacts">👥</CardIcon>}
+                  title="Executive Officer Changes"
+                  titleTypographyProps={{ variant: "h6", fontWeight: 700 }}
+                />
+                <CardContent>
+                  {Array.isArray(updates) && updates.length > 0 ? (
+                    <Grid container spacing={2}>
+                      {updates.map((update, index) => (
+                        <Grid item xs={12} key={index}>
+                          {/* 👇 Wrap with CardActionArea */}
+                          <Card
+                            sx={{
+                              borderRadius: 3,
+                              boxShadow: 2,
+                              transition: "transform 0.3s, box-shadow 0.3s",
+                              "&:hover": {
+                                transform: "translateY(-4px)",
+                                boxShadow: 6,
+                              },
+                            }}
+                          >
+                            <CardActionArea
+                              component="a"
+                              href={update?.URL || "#"} // 👈 per-update URL
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              sx={{ p: 2 }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                {/* Left: Name + Role */}
+                                <Box>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{ fontWeight: 600 }}
+                                  >
+                                    {update?.Name || "N/A"}
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    {update?.Role_Affected || "N/A"}
+                                  </Typography>
+                                </Box>
 
-                      {/* Right: Change label + Effective Date */}
-                      <Box sx={{ textAlign: "right" }}>
-                        <Chip
-                          label={update?.Type_of_Change || "N/A"}
-                          color="primary"
-                          size="small"
-                          sx={{ fontWeight: 600, mb: 0.5 }}
-                        />
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ display: "block" }}
-                        >
-                          {update?.Effective_Date || "N/A"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
+                                {/* Right: Change label + Effective Date */}
+                                <Box sx={{ textAlign: "right" }}>
+                                  <Chip
+                                    label={update?.Type_of_Change || "N/A"}
+                                    color="primary"
+                                    size="small"
+                                    sx={{ fontWeight: 600, mb: 0.5 }}
+                                  />
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{ display: "block" }}
+                                  >
+                                    {update?.Effective_Date || "N/A"}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </CardActionArea>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No executive officer changes found in this filing.
+                    </Typography>
+                  )}
+                </CardContent>
+              </StyledCard>
+            </Box>
           </Grid>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            No executive officer changes found in this filing.
-          </Typography>
-        )}
-      </CardContent>
-    </StyledCard>
-  </Box>
-</Grid>
-
         </Grid>
       </Container>
     </Box>

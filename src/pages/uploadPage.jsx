@@ -36,6 +36,8 @@ function UploadPage() {
   const [mapping, setMapping] = useState({
     company: "",
     address: "",
+    city: "",
+    state: "",
     lease_date: "",
     sqft: "",
   });
@@ -166,6 +168,8 @@ function UploadPage() {
       const filteredData = tableData.map((row) => ({
         company: row["Company Name"] || "",
         address: row["Address"] || "",
+        city: row["City"] || "",
+        state: row["State"] || "",
         lease_date: row["Lease Expiration Date"] || "",
         sqft: row["Square Footage"] || "",
       }));
@@ -266,6 +270,8 @@ function UploadPage() {
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {renderDropdown("company", "Company Name")}
               {renderDropdown("address", "Address")}
+              {renderDropdown("city", "City")}
+              {renderDropdown("state", "State")}
               {renderDropdown("lease_date", "Lease Expiration Date")}
               {renderDropdown("sqft", "Square Footage")}
             </Box>
@@ -293,6 +299,8 @@ function UploadPage() {
                 <TableRow>
                   <TableCell>Company Name</TableCell>
                   <TableCell>Address</TableCell>
+                  <TableCell>City</TableCell>
+                  <TableCell>State</TableCell>
                   <TableCell>Lease Expiration Date</TableCell>
                   <TableCell>Square Footage</TableCell>
                   <TableCell>Actions</TableCell>
@@ -337,6 +345,28 @@ function UploadPage() {
                           helperText={fieldHasError("Address") ? errorMsg : ""}
                           onChange={(e) =>
                             handleEdit(globalIndex, "Address", e.target.value)
+                          }
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <TextField
+                          value={row["City"] ?? ""}
+                          error={fieldHasError("City")}
+                          helperText={fieldHasError("City") ? errorMsg : ""}
+                          onChange={(e) =>
+                            handleEdit(globalIndex, "City", e.target.value)
+                          }
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <TextField
+                          value={row["State"] ?? ""}
+                          error={fieldHasError("State")}
+                          helperText={fieldHasError("State") ? errorMsg : ""}
+                          onChange={(e) =>
+                            handleEdit(globalIndex, "State", e.target.value)
                           }
                         />
                       </TableCell>
