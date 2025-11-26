@@ -30,7 +30,6 @@ export default function PrivateCompanyDetailsPage() {
         const response = await axios.get(
           `${backendUrl}/get-private-company-info/${id}`
         );
-
         if (response.data.error) {
           console.error(response.data.error);
           setData(null);
@@ -51,7 +50,9 @@ export default function PrivateCompanyDetailsPage() {
 
   if (loading) return <Typography>Loading...</Typography>;
   if (!data || !data.company_data)
-    return <Typography>No company data available.</Typography>;
+    return
+    <Typography> <Navbar />
+    No company data available.</Typography>;
 
   const {
     company,
@@ -68,10 +69,8 @@ export default function PrivateCompanyDetailsPage() {
     state,
     address,
     sqft} = data || [];
-console.log(data);
   const imgUrl = data?.logo_url || "";
   const news = data?.news_data || [];
-
   return (
     <Box sx={{ maxWidth: "1200px", mx: "auto", px: 3, py: 15 }}>
       <Navbar />
@@ -194,7 +193,7 @@ console.log(data);
           Property Lease Expiration Date : {lease_date || ""}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Property Address : {address || ""}
+          Property Address : {address + ", " + city + ", " + state || "" + "" + ""}
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Square Footage : {sqft || ""}
