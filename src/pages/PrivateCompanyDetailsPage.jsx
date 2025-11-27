@@ -15,44 +15,67 @@ import {
   Work as WorkIcon,
 } from "@mui/icons-material";
 import Navbar from "../components/dashboard/Navbar";
+import { Card, CardContent, CardHeader } from "@mui/material";
 
 export default function PrivateCompanyDetailsPage() {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [newsLoading, setNewsLoading] = useState(true);
-
+  const [newsLoading, setNewsLoading] = useState(null);
+  const [industryData, setIndustryData] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
-    const fetchCompanyData = async () => {
-      try {
-        const response = await axios.get(
-          `${backendUrl}/get-private-company-info/${id}`
-        );
-        if (response.data.error) {
-          console.error(response.data.error);
-          setData(null);
-        } else {
-          setData(response.data);
-        }
-      } catch (err) {
-        console.error("Error fetching company data:", err);
-        setData(null);
-      } finally {
-        setLoading(false);
-        setNewsLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setNewsLoading(true);
 
-    fetchCompanyData();
-  }, [id]);
+      // 1️⃣ Fetch company data
+      const companyRes = await axios.get(`${backendUrl}/get-private-company-info/${id}`);
+      if (companyRes.data.error) {
+        console.error(companyRes.data.error);
+        setData(null);
+        setIndustryData(null);
+        return;
+      }
+
+      const companyData = companyRes.data.company_data;
+      setData(companyRes.data);
+
+      // 2️⃣ If sector exists, fetch industry analysis
+      if (companyData?.sector) {
+        const encodedSector = encodeURIComponent(companyData.sector);
+        const industryRes = await axios.get(
+          `${backendUrl}/api/industrySectorAnalysis/${encodedSector}`
+        );
+        setIndustryData(industryRes.data);
+      } else {
+        console.warn("No sector available for this company.");
+        setIndustryData(null);
+      }
+
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setData(null);
+      setIndustryData(null);
+    } finally {
+      setLoading(false);
+      setNewsLoading(false);
+    }
+  };
+
+  fetchData();
+}, [id]);
+
 
   if (loading) return <Typography>Loading...</Typography>;
-  if (!data || !data.company_data)
-    return
-    <Typography> <Navbar />
-    No company data available.</Typography>;
+  if (!data || !data.company_data) return;
+  <Typography>
+    {" "}
+    <Navbar />
+    No company data available.
+  </Typography>;
 
   const {
     company,
@@ -62,15 +85,13 @@ export default function PrivateCompanyDetailsPage() {
     active_job_count,
     locations,
     about,
-    industry
+    industry,
+    sector,
   } = data.company_data;
-  const { lease_date,
-    city, 
-    state,
-    address,
-    sqft} = data || [];
+  const { lease_date, city, state, address, sqft } = data || [];
   const imgUrl = data?.logo_url || "";
   const news = data?.news_data || [];
+
   return (
     <Box sx={{ maxWidth: "1200px", mx: "auto", px: 3, py: 15 }}>
       <Navbar />
@@ -185,7 +206,7 @@ export default function PrivateCompanyDetailsPage() {
       </Box>
 
       {/*Property Data From Uploaded CSV */}
-    <Box sx={{ mt: 6 }}>
+      <Box sx={{ mt: 6 }}>
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
           Property Data From Uploaded CSV
         </Typography>
@@ -193,7 +214,8 @@ export default function PrivateCompanyDetailsPage() {
           Property Lease Expiration Date : {lease_date || ""}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Property Address : {address + ", " + city + ", " + state || "" + "" + ""}
+          Property Address :{" "}
+          {address + ", " + city + ", " + state || "" + "" + ""}
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Square Footage : {sqft || ""}
@@ -340,6 +362,58 @@ export default function PrivateCompanyDetailsPage() {
               );
             })}
           </Grid>
+        )}
+      </Box>
+      {/* INDUSTRY ANALYSIS SECTION */}
+      <Box sx={{ mt: 6 }}>
+        {industryData ? (
+          <Card sx={{ p: 2, borderRadius: 3, boxShadow: 3 }}>
+            <CardHeader
+              title={
+                <Typography variant="h6" fontWeight="bold">
+                  {industryData.sector} {industryData.icon}
+                </Typography>
+              }
+            />
+
+            <CardContent>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                {industryData.relevance}
+              </Typography>
+
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  Growth Drivers:
+                </Typography>
+                <Typography variant="body2">
+                  {industryData.growth_drivers}
+                </Typography>
+              </Box>
+
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" fontWeight="bold">
+                  Metrics:
+                </Typography>
+                {Object.entries(industryData.metrics).map(([key, value]) => (
+                  <Typography key={key} variant="body2">
+                    • <strong>{key}</strong>: {value}
+                  </Typography>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card
+            sx={{ p: 3, borderRadius: 3, boxShadow: 2, bgcolor: "#f8f9fa" }}
+          >
+            <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+              🚧 Sector Insights Not Available
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              We are still generating industry insights for this company. Please
+              check back later.
+            </Typography>
+          </Card>
         )}
       </Box>
     </Box>
