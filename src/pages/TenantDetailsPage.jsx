@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CardActionArea } from "@mui/material";
 import Link from "@mui/material/Link";
@@ -92,33 +92,6 @@ const isUSAddress = (address) =>
   usStates.some((state) => address.toLowerCase().includes(state.toLowerCase()));
 
 // Styled components
-const HeaderContainer = styled(Box)(({ theme }) => ({
-  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  color: "white",
-  padding: theme.spacing(4),
-  position: "relative",
-  overflow: "hidden",
-  marginTop: "64px",
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background:
-      'url("data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><defs><pattern id=\\"grid\\" width=\\"10\\" height=\\"10\\" patternUnits=\\"userSpaceOnUse\\"><path d=\\"M 10 0 L 0 0 0 10\\" fill=\\"none\\" stroke=\\"rgba(255,255,255,0.1)\\" stroke-width=\\"1\\"/></pattern></defs><rect width=\\"100\\" height=\\"100\\" fill=\\"url(%23grid)\\"/></svg>")',
-    opacity: 0.3,
-  },
-}));
-
-const HeaderContent = styled(Box)(({ theme }) => ({
-  position: "relative",
-  zIndex: 1,
-  maxWidth: 1200,
-  margin: "0 auto",
-}));
-
 const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: 16,
   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
@@ -168,256 +141,112 @@ const TenantDetailsPage = () => {
     usTotal: 0,
     nonUsTotal: 0,
   });
-  // useEffect(() => {
-  //   const fetchAllData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       console.time("Total Fetch");
-
-  //       console.time("Tenant Fetch");
-  //       const tenantRes = await fetch(`${backendUrl}/api/tenants/${id}`);
-  //       const tenantData = await tenantRes.json();
-  //       console.timeEnd("Tenant Fetch");
-
-  //       console.time("Property Fetch");
-  //       const propertyRes = await fetch(
-  //         `${backendUrl}/api/property_details/${id}`
-  //       );
-  //       const propertyData = await propertyRes.json();
-  //       console.timeEnd("Property Fetch");
-
-  //       console.time("News Fetch");
-  //       const newsData = await fetch(`${backendUrl}/api/news_data/${id}`).then(
-  //         (res) => res.json()
-  //       );
-  //       console.timeEnd("News Fetch");
-
-  //       console.time("10-Q Fetch");
-  //       const tenQData = await fetch(
-  //         `${backendUrl}/api/tenq_summary/${id}`
-  //       ).then((res) => res.json());
-  //       console.timeEnd("10-Q Fetch");
-
-  //       console.time("8-K Fetch");
-  //       const eightKData = await fetch(
-  //         `${backendUrl}/api/eightk_data/${id}`
-  //       ).then((res) => res.json());
-  //       console.timeEnd("8-K Fetch");
-
-  //       console.time("AI Fetch");
-  //       const aiData = await fetch(
-  //         `${backendUrl}/api/tenants/comapny_AI_summary/${id}`
-  //       ).then((res) => res.json());
-  //       console.timeEnd("AI Fetch");
-
-  //       console.timeEnd("Total Fetch");
-
-  //       // Set states
-  //       setTenant(tenantData);
-  //       setNewsData(newsData);
-  //       setTenQData(tenQData || []);
-  //       setEightkdata(eightKData || []);
-  //       setCompanyAISummary(aiData && aiData.summary ? aiData : null);
-
-  //       // Process property data
-  //       if (propertyData) {
-  //         console.time("Lease Processing");
-
-  //         const leaseCounts = propertyData?.lease_counts || {
-  //           usTotal: 0,
-  //           nonUsTotal: 0,
-  //           total: 0,
-  //         };
-  //         setLeaseCounts({
-  //           usTotal: leaseCounts.usTotal,
-  //           nonUsTotal: leaseCounts.nonUsTotal,
-  //           total: leaseCounts.total,
-  //         });
-
-  //         const allReports = propertyData?.data?.[0]?.All_Reports || {};
-  //         let leaseList = [];
-  //         Object.values(allReports).forEach((reports) => {
-  //           reports.forEach((report) => {
-  //             if (Array.isArray(report.Leases) && report.Leases.length > 0) {
-  //               const filtered = report.Leases.filter(
-  //                 (l) => l["Real Estate Property"] === "Yes"
-  //               ).map((l) => ({
-  //                 ...l,
-  //                 filingDate: report["Filing Date"],
-  //                 url: report["URL"],
-  //               }));
-  //               leaseList = [...leaseList, ...filtered];
-  //             }
-  //           });
-  //         });
-  //         setLeases(leaseList);
-
-  //         // Split and sort leases
-  //         const us = { upcoming: [], expired: [] };
-  //         const nonUs = { upcoming: [], expired: [] };
-  //         leaseList.forEach((lease) => {
-  //           const dateString =
-  //             lease["clean_lease_expiration_date"] ||
-  //             lease["Lease Expiration Date"];
-  //           if (
-  //             !dateString ||
-  //             dateString.trim() === "" ||
-  //             dateString === "null"
-  //           )
-  //             return;
-
-  //           const leaseDate = new Date(dateString);
-  //           if (isNaN(leaseDate.getTime())) return;
-
-  //           const target = isUSAddress(lease["Lease Property Address"])
-  //             ? us
-  //             : nonUs;
-  //           if (leaseDate >= new Date()) target.upcoming.push(lease);
-  //           else target.expired.push(lease);
-  //         });
-
-  //         const sortByDate = (arr) =>
-  //           arr.sort(
-  //             (a, b) =>
-  //               new Date(
-  //                 a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
-  //               ) -
-  //               new Date(
-  //                 b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
-  //               )
-  //           );
-
-  //         setUsLeases({
-  //           upcoming: sortByDate(us.upcoming),
-  //           expired: sortByDate(us.expired),
-  //         });
-  //         setNonUsLeases({
-  //           upcoming: sortByDate(nonUs.upcoming),
-  //           expired: sortByDate(nonUs.expired),
-  //         });
-
-  //         console.timeEnd("Lease Processing");
-  //       }
-  //     } catch (err) {
-  //       console.error("Error fetching all data:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchAllData();
-  // }, [id]);
-
+  const propertyRef = useRef(null);
+  const scrollToProperty = () => {
+    propertyRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
   useEffect(() => {
-    // 1. Fast tenant + property fetch
-    const fetchTenantAndProperty = async () => {
-      setLoading(true);
-      try {
-        const [tenantRes, propertyRes] = await Promise.all([
-          fetch(`${backendUrl}/api/tenants/${id}`),
-          fetch(`${backendUrl}/api/property_details/${id}`),
-        ]);
-        const [tenantData, propertyData] = await Promise.all([
-          tenantRes.json(),
-          propertyRes.json(),
-        ]);
-        setTenant(tenantData);
+  const fetchTenantMaster = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${backendUrl}/api/tenant_master_aggregated/${id}`);
+      const master = await res.json();
+      // 1. BASIC TENANT INFO
+      setTenant(master.tenant_info || {});
 
-        if (propertyData) {
-          const leaseCounts = propertyData?.lease_counts || {
-            usTotal: 0,
-            nonUsTotal: 0,
-            total: 0,
-          };
-          setLeaseCounts(leaseCounts);
-
-          const allReports = propertyData?.data?.[0]?.All_Reports || {};
-          let leaseList = [];
-          Object.values(allReports).forEach((reports) =>
-            reports.forEach((report) => {
-              if (Array.isArray(report.Leases)) {
-                leaseList.push(
-                  ...report.Leases.filter(
-                    (l) => l["Real Estate Property"] === "Yes"
-                  ).map((l) => ({
-                    ...l,
-                    filingDate: report["Filing Date"],
-                    url: report["URL"],
-                  }))
-                );
-              }
-            })
-          );
-          setLeases(leaseList);
-
-          const us = { upcoming: [], expired: [] };
-          const nonUs = { upcoming: [], expired: [] };
-
-          leaseList.forEach((lease) => {
-            const dateString =
-              lease["clean_lease_expiration_date"] ||
-              lease["Lease Expiration Date"];
-            if (!dateString || dateString === "null") return;
-
-            const leaseDate = new Date(dateString);
-            if (isNaN(leaseDate.getTime())) return;
-
-            const target = isUSAddress(lease["Lease Property Address"])
-              ? us
-              : nonUs;
-            if (leaseDate >= new Date()) target.upcoming.push(lease);
-            else target.expired.push(lease);
-          });
-
-          const sortByDate = (arr) =>
-            arr.sort(
-              (a, b) =>
-                new Date(
-                  a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
-                ) -
-                new Date(
-                  b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
-                )
-            );
-
-          setUsLeases({
-            upcoming: sortByDate(us.upcoming),
-            expired: sortByDate(us.expired),
-          });
-          setNonUsLeases({
-            upcoming: sortByDate(nonUs.upcoming),
-            expired: sortByDate(nonUs.expired),
-          });
+      // 2. PROPERTY + LEASE COUNTS
+      const propertyData = master.property_data || {};
+      
+      setLeaseCounts(
+        propertyData?.lease_counts || {
+          usTotal: 0,
+          nonUsTotal: 0,
+          total: 0,
         }
-      } catch (err) {
-        console.error("Tenant/Property fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      );
 
-    // 2. Heavy data fetch in background (async, no await)
-    const fetchHeavyData = () => {
-      Promise.all([
-        fetch(`${backendUrl}/api/news_data/${id}`).then((res) => res.json()),
-        fetch(`${backendUrl}/api/tenq_summary/${id}`).then((res) => res.json()),
-        fetch(`${backendUrl}/api/eightk_data/${id}`).then((res) => res.json()),
-        fetch(`${backendUrl}/api/tenants/comapny_AI_summary/${id}`).then(
-          (res) => res.json()
-        ),
-      ])
-        .then(([newsData, tenQData, eightKData, aiData]) => {
-          setNewsData(newsData);
-          setTenQData(tenQData || []);
-          setEightkdata(eightKData || []);
-          setCompanyAISummary(aiData?.summary ? aiData : null);
+      // 3. FLATTEN LEASE REPORTS
+      const allReports = propertyData.All_Reports || {};
+      let leaseList = [];
+      Object.values(allReports).forEach((reports) =>
+        reports.forEach((report) => {
+          if (Array.isArray(report.Leases)) {
+            leaseList.push(
+              ...report.Leases.filter(
+                (l) => l["Real Estate Property"] === "Yes"
+              ).map((l) => ({
+                ...l,
+                filingDate: report["Filing Date"],
+                url: report["URL"],
+              }))
+            );
+          }
         })
-        .catch((err) => console.error("Heavy data fetch error:", err));
-    };
+      );
 
-    fetchTenantAndProperty();
-    fetchHeavyData();
-  }, [id]);
+      setLeases(leaseList);
+
+      // 4. US vs NON-US LEASE SPLIT
+      const us = { upcoming: [], expired: [] };
+      const nonUs = { upcoming: [], expired: [] };
+
+      leaseList.forEach((lease) => {
+        const dateString =
+          lease["clean_lease_expiration_date"] ||
+          lease["Lease Expiration Date"];
+
+        if (!dateString || dateString === "null") return;
+
+        const leaseDate = new Date(dateString);
+        if (isNaN(leaseDate.getTime())) return;
+
+        const target = isUSAddress(lease["Lease Property Address"])
+          ? us
+          : nonUs;
+
+        if (leaseDate >= new Date()) target.upcoming.push(lease);
+        else target.expired.push(lease);
+      });
+
+      const sortByDate = (arr) =>
+        arr.sort(
+          (a, b) =>
+            new Date(
+              a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
+            ) -
+            new Date(
+              b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
+            )
+        );
+
+      setUsLeases({
+        upcoming: sortByDate(us.upcoming),
+        expired: sortByDate(us.expired),
+      });
+
+      setNonUsLeases({
+        upcoming: sortByDate(nonUs.upcoming),
+        expired: sortByDate(nonUs.expired),
+      });
+
+      // 5. NEWS, 10Q, 8K, AI SUMMARY
+      setNewsData(master.news_data || []);
+      setTenQData(master.tenq_data || []);
+      setEightkdata(master.eightk_data || []);
+      setCompanyAISummary(
+        master.ai_data?.summary ? master.ai_data : null
+      );
+
+    } catch (err) {
+      console.error("Tenant Master fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchTenantMaster();
+}, [id]);
+
 
   if (loading) {
     return (
@@ -448,7 +277,6 @@ const TenantDetailsPage = () => {
       </Box>
     );
   }
-  // Safely flatten all 8-K updates, ignoring empty or malformed entries
   const updates = (Array.isArray(eightkdata) ? eightkdata : [eightkdata])
     .flatMap((item) => (Array.isArray(item?.filings) ? item.filings : []))
     .flatMap((filing) =>
@@ -541,12 +369,20 @@ const TenantDetailsPage = () => {
       return dateA.getTime() - dateB.getTime();
     });
 
+  const handleTenantClick = (tenantId) => {
+    navigate(`/tenant/${tenantId}`);
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f8fafc" }}>
       <Navbar />
       {/* Header */}
       <Box sx={{ mt: 4 }}>
-        <HeaderSection tenant={tenant} eightkData={eightkdata} />
+        <HeaderSection
+          tenant={tenant}
+          leaseCounts={leaseCounts}
+          onScrollToProperty={scrollToProperty}
+        />
       </Box>
       {/* Main Content */}
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -678,7 +514,7 @@ const TenantDetailsPage = () => {
                 </CardContent>
               </StyledCard>
 
-              <StyledCard>
+              <StyledCard ref={propertyRef} sx={{ mt: 4 }}>
                 <CardContent>
                   {/* Lease Properties Section - Separate US and Non-US with Collapsible Expired */}
                   {(usLeases.upcoming.length > 0 ||
@@ -1360,7 +1196,7 @@ const TenantDetailsPage = () => {
                           >
                             <CardActionArea
                               component="a"
-                              href={update?.URL || "#"} // 👈 per-update URL
+                              href={update?.URL || "#"}
                               target="_blank"
                               rel="noopener noreferrer"
                               sx={{ p: 2 }}
@@ -1413,6 +1249,63 @@ const TenantDetailsPage = () => {
                   ) : (
                     <Typography variant="body2" color="text.secondary">
                       No executive officer changes found in this filing.
+                    </Typography>
+                  )}
+                </CardContent>
+              </StyledCard>
+
+              <StyledCard>
+                <CardHeader
+                  title="Competitor List"
+                  titleTypographyProps={{ variant: "h6", fontWeight: 700 }}
+                />
+                <CardContent>
+                  {Array.isArray(tenant.competitor_list) &&
+                  tenant.competitor_list.length > 0 ? (
+                    <Grid container spacing={2}>
+                      {tenant.competitor_list.map((competitor, index) => (
+                        <Grid item xs={12} key={index}>
+                          {/* 👇 Wrap with CardActionArea */}
+                          <Card
+                            sx={{
+                              borderRadius: 3,
+                              boxShadow: 2,
+                              transition: "transform 0.3s, box-shadow 0.3s",
+                              "&:hover": {
+                                transform: "translateY(-4px)",
+                                boxShadow: 6,
+                              },
+                            }}
+                          >
+                            <CardActionArea
+                              onClick={() => handleTenantClick(competitor?._id)}
+                              sx={{ p: 2, cursor: "pointer" }}
+                            >
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                }}
+                              >
+                                {/* Left: Name + Role */}
+                                <Box>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{ fontWeight: 600 }}
+                                  >
+                                    {competitor?.tenant_name || "N/A"}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </CardActionArea>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      No Competitor found for this tenant.
                     </Typography>
                   )}
                 </CardContent>

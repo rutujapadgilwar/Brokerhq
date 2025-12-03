@@ -18,17 +18,17 @@ import {
   Work as WorkIcon,
 } from "@mui/icons-material";
 
-export default function HeaderSection({ tenant, eightkData }) {
+export default function HeaderSection({ tenant, leaseCounts, onScrollToProperty }) {
   if (!tenant) return null;
-  
+
   const getLatestJobCount = (jobCounts) => {
     if (!Array.isArray(jobCounts) || jobCounts.length === 0) return "N/A";
-    
+
     // Sort by date in descending order and get the first (most recent) count
-    const latestCount = jobCounts
-      .sort((a, b) => new Date(b.date) - new Date(a.date))[0]
-      .count;
-      
+    const latestCount = jobCounts.sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    )[0].count;
+
     return latestCount ?? "N/A";
   };
   return (
@@ -45,20 +45,20 @@ export default function HeaderSection({ tenant, eightkData }) {
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Avatar
-              src={tenant?.logo_url || ""}
-              alt={tenant || tenant_name || "Company"}
-              sx={{
-                bgcolor: "primary.main",
-                width: 72,
-                height: 72,
-                fontSize: 28,
-                fontWeight: 700,
-              }}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = ""; 
-              }}
-            >
+            src={tenant?.logo_url || ""}
+            alt={tenant || tenant_name || "Company"}
+            sx={{
+              bgcolor: "primary.main",
+              width: 72,
+              height: 72,
+              fontSize: 28,
+              fontWeight: 700,
+            }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "";
+            }}
+          >
             {tenant.tenant_name
               ? tenant.tenant_name
                   .split(" ")
@@ -94,9 +94,34 @@ export default function HeaderSection({ tenant, eightkData }) {
           <InfoCard
             icon={<LocationIcon color="primary" />}
             label="HQ"
-            value={`${tenant.headquarter_address?.city || "N/A"}, ${
-              tenant.headquarter_address?.state || "N/A"
-            }`}
+            value={
+              <div>
+                {tenant.headquarter_address?.city || "N/A"},{" "}
+                {tenant.headquarter_address?.state || "N/A"}
+                <br />
+                <span
+                  style={{
+                    color: "#1976d2",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={onScrollToProperty}
+                >
+                  US: {leaseCounts?.usTotal ?? 0}
+                </span>
+                {" | "}
+                <span
+                  style={{
+                    color: "#1976d2",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                  onClick={onScrollToProperty}
+                >
+                  Non-US: {leaseCounts?.nonUsTotal ?? 0}
+                </span>
+              </div>
+            }
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
@@ -171,8 +196,6 @@ export default function HeaderSection({ tenant, eightkData }) {
           />
         </Grid>
       </Grid>
-
-    
     </Box>
   );
 }

@@ -749,18 +749,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                               </Typography>
                             </Box>
                           </TableCell>
-                          {/* Move Probability */}
-                          {/* <TableCell sx={{ textAlign: "center" }}>
-                            <ScoreDisplay score={moveProbability}>
-                              <Typography className="score-value">
-                                {moveProbability}%
-                              </Typography>
-                              <Typography className="score-label">
-                                Move Probability
-                              </Typography>
-                            </ScoreDisplay>
-                          </TableCell> */}
-                          {/* Lease Expiration & Months Until Expiration */}
                           <TableCell sx={{ textAlign: "center" }}>
                             <Chip
                               label={leaseExpiration ?? "--"}
