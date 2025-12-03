@@ -23,7 +23,7 @@ export default function CompanySummary({ data }) {
   const summary = data.summary;
 
   return (
-    <Box sx={{ maxWidth: "1200px", mx: "auto", px: 3, py: 4 }}>
+    <Box sx={{ maxWidth: "1500px", mx: "auto", px: 1, py: 1 }}>
       {/* Three-Paragraph Summary */}
       <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 3 }}>
         <CardHeader
@@ -34,7 +34,7 @@ export default function CompanySummary({ data }) {
           }
         />
         <CardContent>
-          <Stack spacing={2}>
+          <Stack>
             {summary.Three_paragraph_summary &&
               Object.entries(summary.Three_paragraph_summary).map(
                 ([key, value], i) => (
@@ -67,21 +67,21 @@ export default function CompanySummary({ data }) {
                 : []
               ).map((item, idx) => (
                 <Chip
-  key={idx}
-  label={item}
-  variant="outlined"
-  sx={{
-    fontWeight: 500,
-    whiteSpace: "normal",
-    height: "auto",
-    color: "black",       // text color
-    borderColor: "black", // outline color
-    "& .MuiChip-label": {
-      display: "block",
-      whiteSpace: "normal",
-    },
-  }}
-/>
+                  key={idx}
+                  label={item}
+                  variant="outlined"
+                  sx={{
+                    fontWeight: 500,
+                    whiteSpace: "normal",
+                    height: "auto",
+                    color: "black", // text color
+                    borderColor: "black", // outline color
+                    "& .MuiChip-label": {
+                      display: "block",
+                      whiteSpace: "normal",
+                    },
+                  }}
+                />
               ))}
             </Stack>
           </CardContent>
@@ -102,28 +102,26 @@ export default function CompanySummary({ data }) {
                 : []
               ).map((item, idx) => (
                 <Chip
-  key={idx}
-  label={item}
-  variant="outlined"
-  sx={{
-    fontWeight: 500,
-    whiteSpace: "normal",
-    height: "auto",
-    color: "black",       // text color
-    borderColor: "black", // outline color
-    "& .MuiChip-label": {
-      display: "block",
-      whiteSpace: "normal",
-    },
-  }}
-/>
+                  key={idx}
+                  label={item}
+                  variant="outlined"
+                  sx={{
+                    fontWeight: 500,
+                    whiteSpace: "normal",
+                    height: "auto",
+                    color: "black", // text color
+                    borderColor: "black", // outline color
+                    "& .MuiChip-label": {
+                      display: "block",
+                      whiteSpace: "normal",
+                    },
+                  }}
+                />
               ))}
             </Stack>
           </CardContent>
         </Card>
       </Box>
-
-      <Divider sx={{ my: 3 }} />
 
       {/* Why it Matters for CRE */}
       {/* Why it Matters for CRE */}
