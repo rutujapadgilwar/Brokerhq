@@ -146,108 +146,103 @@ const TenantDetailsPage = () => {
     propertyRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   useEffect(() => {
-  const fetchTenantMaster = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${backendUrl}/api/tenant_master_aggregated/${id}`);
-      const master = await res.json();
-      // 1. BASIC TENANT INFO
-      setTenant(master.tenant_info || {});
+    const fetchTenantMaster = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${backendUrl}/api/tenantdetailspage/${id}`);
+        const master = await res.json();
+        // 1. BASIC TENANT INFO
+        setTenant(master.tenant_info || {});
 
-      // 2. PROPERTY + LEASE COUNTS
-      const propertyData = master.property_data || {};
-      
-      setLeaseCounts(
-        propertyData?.lease_counts || {
-          usTotal: 0,
-          nonUsTotal: 0,
-          total: 0,
-        }
-      );
+        // 2. PROPERTY + LEASE COUNTS
+        const propertyData = master.property_data[0] || {};
 
-      // 3. FLATTEN LEASE REPORTS
-      const allReports = propertyData.All_Reports || {};
-      let leaseList = [];
-      Object.values(allReports).forEach((reports) =>
-        reports.forEach((report) => {
-          if (Array.isArray(report.Leases)) {
-            leaseList.push(
-              ...report.Leases.filter(
-                (l) => l["Real Estate Property"] === "Yes"
-              ).map((l) => ({
-                ...l,
-                filingDate: report["Filing Date"],
-                url: report["URL"],
-              }))
-            );
+        setLeaseCounts(
+          propertyData?.lease_counts || {
+            usTotal: 0,
+            nonUsTotal: 0,
+            total: 0,
           }
-        })
-      );
-
-      setLeases(leaseList);
-
-      // 4. US vs NON-US LEASE SPLIT
-      const us = { upcoming: [], expired: [] };
-      const nonUs = { upcoming: [], expired: [] };
-
-      leaseList.forEach((lease) => {
-        const dateString =
-          lease["clean_lease_expiration_date"] ||
-          lease["Lease Expiration Date"];
-
-        if (!dateString || dateString === "null") return;
-
-        const leaseDate = new Date(dateString);
-        if (isNaN(leaseDate.getTime())) return;
-
-        const target = isUSAddress(lease["Lease Property Address"])
-          ? us
-          : nonUs;
-
-        if (leaseDate >= new Date()) target.upcoming.push(lease);
-        else target.expired.push(lease);
-      });
-
-      const sortByDate = (arr) =>
-        arr.sort(
-          (a, b) =>
-            new Date(
-              a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
-            ) -
-            new Date(
-              b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
-            )
         );
 
-      setUsLeases({
-        upcoming: sortByDate(us.upcoming),
-        expired: sortByDate(us.expired),
-      });
+        // 3. FLATTEN LEASE REPORTS
+        const allReports = propertyData.All_Reports || {};
+        let leaseList = [];
+        Object.values(allReports).forEach((reports) =>
+          reports.forEach((report) => {
+            if (Array.isArray(report.Leases)) {
+              leaseList.push(
+                ...report.Leases.filter(
+                  (l) => l["Real Estate Property"] === "Yes"
+                ).map((l) => ({
+                  ...l,
+                  filingDate: report["Filing Date"],
+                  url: report["URL"],
+                }))
+              );
+            }
+          })
+        );
 
-      setNonUsLeases({
-        upcoming: sortByDate(nonUs.upcoming),
-        expired: sortByDate(nonUs.expired),
-      });
+        setLeases(leaseList);
 
-      // 5. NEWS, 10Q, 8K, AI SUMMARY
-      setNewsData(master.news_data || []);
-      setTenQData(master.tenq_data || []);
-      setEightkdata(master.eightk_data || []);
-      setCompanyAISummary(
-        master.ai_data?.summary ? master.ai_data : null
-      );
+        // 4. US vs NON-US LEASE SPLIT
+        const us = { upcoming: [], expired: [] };
+        const nonUs = { upcoming: [], expired: [] };
 
-    } catch (err) {
-      console.error("Tenant Master fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        leaseList.forEach((lease) => {
+          const dateString =
+            lease["clean_lease_expiration_date"] ||
+            lease["Lease Expiration Date"];
 
-  fetchTenantMaster();
-}, [id]);
+          if (!dateString || dateString === "null") return;
 
+          const leaseDate = new Date(dateString);
+          if (isNaN(leaseDate.getTime())) return;
 
+          const target = isUSAddress(lease["Lease Property Address"])
+            ? us
+            : nonUs;
+
+          if (leaseDate >= new Date()) target.upcoming.push(lease);
+          else target.expired.push(lease);
+        });
+
+        const sortByDate = (arr) =>
+          arr.sort(
+            (a, b) =>
+              new Date(
+                a["clean_lease_expiration_date"] || a["Lease Expiration Date"]
+              ) -
+              new Date(
+                b["clean_lease_expiration_date"] || b["Lease Expiration Date"]
+              )
+          );
+
+        setUsLeases({
+          upcoming: sortByDate(us.upcoming),
+          expired: sortByDate(us.expired),
+        });
+
+        setNonUsLeases({
+          upcoming: sortByDate(nonUs.upcoming),
+          expired: sortByDate(nonUs.expired),
+        });
+
+        // 5. NEWS, 10Q, 8K, AI SUMMARY
+        setNewsData(master.news_data[0] || []);
+        setTenQData(master.tenq_data[0] || []);
+        setEightkdata(master.eightk_data[0] || []);
+        setCompanyAISummary(master.ai_data[0] || []);
+      } catch (err) {
+        console.error("Tenant Master fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTenantMaster();
+  }, [id]);
   if (loading) {
     return (
       <Box

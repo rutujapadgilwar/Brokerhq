@@ -21,7 +21,6 @@ export default function CompanySummary({ data }) {
     );
   }
   const summary = data.summary;
-
   return (
     <Box sx={{ maxWidth: "1500px", mx: "auto", px: 1, py: 1 }}>
       {/* Three-Paragraph Summary */}
