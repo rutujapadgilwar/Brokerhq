@@ -15,12 +15,6 @@ import {
   Chip,
   Stack,
 } from "@mui/material";
-import {
-  Map as MapIcon,
-  ViewList as ListIcon,
-  Business as BusinessIcon,
-  Handshake as HandshakeIcon,
-} from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import FilterPanel from "../filters/FilterPanel";
 import MapPanel from "../map/MapPanel";
@@ -44,23 +38,6 @@ function getRowColorBar(tenant) {
 const StyledTableRow = styled(TableRow)({
   cursor: "pointer",
 });
-
-const ScoreDisplay = styled(Box)(({ theme, score }) => ({
-  textAlign: "center",
-  "& .score-value": {
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    marginBottom: "2px",
-    ...(score >= 85 && { color: theme.palette.error.main }),
-    ...(score >= 60 && score < 85 && { color: theme.palette.warning.main }),
-    ...(score >= 10 && score < 60 && { color: theme.palette.success.main }),
-    ...(score < 10 && { color: theme.palette.grey[500] }),
-  },
-  "& .score-label": {
-    fontSize: "0.75rem",
-    color: theme.palette.grey[600],
-  },
-}));
 
 const TenantDashboard = ({ viewMode, setViewMode, search }) => {
   // State for fetched tenant data
@@ -93,99 +70,21 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
       direction: prev.direction === "asc" ? "desc" : "asc",
     }));
   };
-
-  // Fetch data from backend API on mount
   useEffect(() => {
-    const fetchTenantsAndLeases = async () => {
+    const fetchTenantDashboard = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${backendUrl}/api/tenants`);
-        if (!res.ok) throw new Error("Failed to fetch tenants");
-        const tenants = await res.json();
-        const today = new Date();
-
-        const processedTenants = await Promise.all(
-          tenants.map(async (tenant) => {
-            let leaseExpiration = "--";
-            let monthsUntilExpiration = "--";
-            const tenantId = tenant.tenant_id || tenant._id;
-            if (!tenantId) {
-              console.log(
-                `Tenant: ${tenant.tenant_name}, Lease Expiration: ${leaseExpiration}, Months: ${monthsUntilExpiration} (No tenant_id)`
-              );
-              return { ...tenant, leaseExpiration, monthsUntilExpiration };
-            }
-
-            try {
-              const propertyRes = await fetch(
-                `${backendUrl}/api/property_details/${tenantId}`
-              );
-
-              if (!propertyRes.ok) throw new Error("No property data");
-              const propertyData = await propertyRes.json();
-              const data = propertyData.data[0];
-              const allReports = data?.All_Reports || {};
-
-              let leases = [];
-              let leaseCount = 0;
-
-              Object.values(allReports).forEach((reportArr) => {
-                reportArr.forEach((report) => {
-                  (report.Leases || []).forEach((lease) => {
-                    if (
-                      lease["Real Estate Property"] === "Yes" &&
-                      lease["Lease Expiration Date"]
-                    ) {
-                      leaseCount += 1;
-
-                      const rawDate = lease[
-                        "clean_lease_expiration_date"
-                      ]?.replace(/\u00A0/g, " ");
-                      const parsedDate = new Date(rawDate);
-                      if (!isNaN(parsedDate)) {
-                        leases.push({ ...lease, parsedDate });
-                      }
-                    }
-                  });
-                });
-              });
-
-              // Sort and get nearest future lease
-              leases.sort((a, b) => a.parsedDate - b.parsedDate);
-              const nearestLease = leases.find((l) => l.parsedDate > today);
-
-              leaseExpiration = nearestLease
-                ? nearestLease.parsedDate.toLocaleDateString()
-                : "--";
-              monthsUntilExpiration = nearestLease
-                ? Math.ceil(
-                    (nearestLease.parsedDate - today) /
-                      (1000 * 60 * 60 * 24 * 30)
-                  )
-                : "--";
-
-              return { ...tenant, leaseExpiration, monthsUntilExpiration };
-            } catch (err) {
-              console.warn(
-                `Tenant ${
-                  tenant.ticker || tenant.tenant_id
-                } property fetch error: ${err.message}`
-              );
-
-              return { ...tenant, leaseExpiration, monthsUntilExpiration };
-            }
-          })
-        );
-
-        setTenantData(processedTenants);
+        const res = await fetch(`${backendUrl}/api/tenant_dashboard`);
+        if (!res.ok) throw new Error("Failed to fetch tenant dashboard data");
+        const data = await res.json();
+        setTenantData(data.data);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchTenantsAndLeases();
+    fetchTenantDashboard();
   }, []);
   // Preselect tenant type if coming from IndustryDashboard
   useEffect(() => {
@@ -196,7 +95,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
       }));
     }
   }, [industryFilter]);
-
 
   const handleFilterChange = (newFilters) => {
     setFilters((prev) => ({
@@ -217,19 +115,20 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         // --- Search ---
         const matchesSearch =
           !searchLower ||
-          tenant.tenant_name?.toLowerCase().includes(searchLower) ||
-          tenant.sector?.toLowerCase().includes(searchLower) ||
-          tenant.headquarter_address?.city
+          tenant.tenant_info.tenant_name?.toLowerCase().includes(searchLower) ||
+          tenant.tenant_info.sector?.toLowerCase().includes(searchLower) ||
+          tenant.tenant_info.headquarter_address?.city
             ?.toLowerCase()
             .includes(searchLower) ||
-          tenant.headquarter_address?.state
+          tenant.tenant_info.headquarter_address?.state
             ?.toLowerCase()
             .includes(searchLower);
 
         // --- Industry filter (from URL) ---
         const matchesIndustry =
           !industryFilter ||
-          tenant.sector?.toLowerCase() === industryFilter.toLowerCase();
+          tenant.tenant_info.sector?.toLowerCase() ===
+            industryFilter.toLowerCase();
 
         // --- Tenant Type filter ---
         const activeTenantTypes = Object.entries(filters.tenantTypes || {})
@@ -239,11 +138,11 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         const matchesTenantType =
           activeTenantTypes.length === 0 ||
           activeTenantTypes.some((type) =>
-            tenant.sector?.toLowerCase().includes(type)
+            tenant.tenant_info.sector?.toLowerCase().includes(type)
           );
 
         // --- Lease Term filter ---
-        const months = Number(tenant.monthsUntilExpiration ?? 9999);
+        const months = Number(tenant.months_until_expiration ?? 9999);
         const leaseTerm = filters.leaseTerm || {};
         let matchesLeaseTerm = true;
 
@@ -256,9 +155,10 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
 
         // --- Location filter ---
         const selectedLocations = filters.selectedLocations || [];
-        const tenantCity = tenant.headquarter_address?.city?.toLowerCase();
-        const tenantState = tenant.headquarter_address?.state?.toLowerCase();
-
+        const tenantCity =
+          tenant.tenant_info.headquarter_address?.city?.toLowerCase();
+        const tenantState =
+          tenant.tenant_info.headquarter_address?.state?.toLowerCase();
         const matchesLocation =
           selectedLocations.length === 0 ||
           selectedLocations.some(
@@ -276,17 +176,14 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         );
       })
       .sort((a, b) => {
-        // --- Sort by lease expiration ---
+        // Convert YYYY-MM-DD to Date object
         const parseDate = (dateStr) => {
-          if (!dateStr || dateStr === "--") return null;
-          const [month, day, year] = dateStr
-            .split("/")
-            .map((num) => parseInt(num, 10));
-          return new Date(year, month - 1, day);
+          if (!dateStr) return null;
+          return new Date(dateStr); // ISO format parses directly
         };
 
-        const dateA = parseDate(a.leaseExpiration);
-        const dateB = parseDate(b.leaseExpiration);
+        const dateA = parseDate(a.nearest_lease_expiration);
+        const dateB = parseDate(b.nearest_lease_expiration);
 
         if (!dateA && !dateB) return 0;
         if (!dateA) return 1;
@@ -296,18 +193,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         return sortConfig.direction === "asc" ? comparison : -comparison;
       });
   }, [tenantData, search, filters, industryFilter, sortConfig]);
-
-  // Update the counts for urgent, hot, and warm using move_probability only
-  const urgentCount = filteredData.filter(
-    (t) => Number(t.monthsUntilExpiration ?? 0) < 6
-  ).length;
-  const hotCount = filteredData.filter((t) => {
-    const prob = Number(t.monthsUntilExpiration ?? 0);
-    return prob < 12 && prob > 6;
-  }).length;
-  const warmCount = filteredData.filter(
-    (t) => Number(t.monthsUntilExpiration ?? 0) < 100
-  ).length;
 
   const getLatestJobCount = (jobCounts) => {
     if (!Array.isArray(jobCounts) || jobCounts.length === 0) return "N/A";
@@ -319,8 +204,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
 
     return latestCount ?? "N/A";
   };
-
-  // later in render
 
   // Add GradientButton styled component
   const GradientButton = styled(Button)(({ theme }) => ({
@@ -362,94 +245,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
           width: "100%",
         }}
       >
-        {/* Content Header */}
-        {/* <Paper
-          sx={{
-            bgcolor: "white",
-            p: 2.5,
-            borderBottom: 1,
-            borderColor: "grey.200",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
-        > */}
-          {/* <Box sx={{ display: "flex", gap: 3.75, alignItems: "center" }}>
-            <Typography variant="body2" sx={{ color: "grey.600" }}>
-              {filteredData.length} tenants found
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2.5 }}>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="h6"
-                  sx={{ color: "error.main", fontWeight: 700 }}
-                >
-                  {urgentCount}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "grey.600" }}>
-                  Urgent
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="h6"
-                  sx={{ color: "warning.main", fontWeight: 700 }}
-                >
-                  {hotCount}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "grey.600" }}>
-                  Hot
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography
-                  variant="h6"
-                  sx={{ color: "success.main", fontWeight: 700 }}
-                >
-                  {warmCount}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "grey.600" }}>
-                  Warm
-                </Typography>
-              </Box>
-            </Box>
-          </Box> */}
-          {/* <Stack direction="row" spacing={1.25}>
-            <GradientButton
-              variant={viewMode === "list" ? "contained" : "outlined"}
-              startIcon={<ListIcon />}
-              onClick={() => setViewMode("list")}
-              sx={{
-                ...(viewMode !== "list" && {
-                  background: "transparent",
-                  color: "success.main",
-                  boxShadow: "none",
-                  border: "1px solid",
-                  borderColor: "success.main",
-                  "&:hover": {
-                    background: "rgba(76, 175, 80, 0.08)",
-                  },
-                }),
-              }}
-            >
-              List View
-            </GradientButton>
-            <Button
-              variant={viewMode === "map" ? "contained" : "outlined"}
-              startIcon={<MapIcon />}
-              onClick={() => setViewMode("map")}
-              sx={{
-                ...(viewMode === "map" && {
-                  bgcolor: "success.main",
-                  "&:hover": { bgcolor: "success.dark" },
-                }),
-              }}
-            >
-              Map View
-            </Button>
-          </Stack> */}
-
         {/* Content Area - Table or Map */}
         {viewMode === "list" ? (
           <>
@@ -489,17 +284,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                     >
                       LOCATION
                     </TableCell>
-                    {/* <TableCell
-                      sx={{
-                        bgcolor: "grey.50",
-                        fontWeight: 600,
-                        color: "grey.900",
-                        textAlign: "center",
-                        verticalAlign: "top",
-                      }}
-                    >
-                      MOVE PROBABILITY
-                    </TableCell> */}
                     <TableCell
                       sx={{
                         bgcolor: "grey.50",
@@ -623,49 +407,53 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((tenant, idx) => {
                       const rowcolor = getRowColorBar({
-                        move_probability: tenant.monthsUntilExpiration,
+                        move_probability: tenant.months_until_expiration,
                       });
                       // Lease expiration and months until expiration: you may need to add these fields to your data
-                      const leaseExpiration = tenant.leaseExpiration || "--";
-                      const monthsUntilExpiration =
-                        tenant.monthsUntilExpiration ?? "--";
+                      const leaseExpiration =
+                        tenant.nearest_lease_expiration || "--";
+                      const months_until_expiration =
+                        tenant.months_until_expiration ?? "--";
                       // Location formatting
-                      const location = tenant.headquarter_address
-                        ? `${tenant.headquarter_address.city}, ${tenant.headquarter_address.state}`
+                      const location = tenant.tenant_info.headquarter_address
+                        ? `${tenant.tenant_info.headquarter_address.city}, ${tenant.tenant_info.headquarter_address.state}`
                         : "--";
                       const subLocation =
-                        tenant.headquarter_address?.street || "";
+                        tenant.tenant_info.headquarter_address?.street || "";
                       // Revenue growth percent: fallback to 2 decimals
                       const revenueGrowthPercent =
-                        tenant.revenue_growth_12mo_percent != null
-                          ? `${tenant.revenue_growth_12mo_percent.toFixed(2)}%`
+                        tenant.tenant_info.revenue_growth_12mo_percent != null
+                          ? `${tenant.tenant_info.revenue_growth_12mo_percent.toFixed(
+                              2
+                            )}%`
                           : "--";
                       // Revenue growth amount: show in $K
                       const revenueGrowthAmount =
-                        tenant.revenue_growth_12mo_amount != null
+                        tenant.tenant_info.revenue_growth_12mo_amount != null
                           ? `+$${(
-                              tenant.revenue_growth_12mo_amount / 1000
+                              tenant.tenant_info.revenue_growth_12mo_amount /
+                              1000
                             ).toLocaleString()}K`
                           : "--";
                       // Headcount growth percent
                       const headcountGrowthPercent =
-                        tenant.headcount_growth_percentage != null
-                          ? `${tenant.headcount_growth_percentage.toFixed(2)}%`
+                        tenant.tenant_info.headcount_growth_percentage != null
+                          ? `${tenant.tenant_info.headcount_growth_percentage.toFixed(
+                              2
+                            )}%`
                           : "--";
                       // Headcount growth number
                       const headcountGrowth =
-                        tenant.headcount_growth != null
-                          ? tenant.headcount_growth
+                        tenant.tenant_info.headcount_growth != null
+                          ? tenant.tenant_info.headcount_growth
                           : "--";
-                      // // Move probability
-                      // const moveProbability =
-                      //   tenant.move_probability_score?.score ?? "--";
 
-                      
                       return (
                         <StyledTableRow
-                          key={tenant._id || idx}
-                          onClick={() => handleTenantClick(tenant._id || idx)}
+                          key={tenant.tenant_info._id || idx}
+                          onClick={() =>
+                            handleTenantClick(tenant.tenant_info._id || idx)
+                          }
                           sx={{ cursor: "pointer" }}
                         >
                           {/* Color bar */}
@@ -692,19 +480,25 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                                 bgcolor: "grey.200",
                               }}
                             >
-                              {tenant.logo_url ? (
+                              {tenant.tenant_info.logo_url ? (
                                 <img
-                                  src={tenant.logo_url}
-                                  alt={tenant.tenant_name}
-                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  src={tenant.tenant_info.logo_url}
+                                  alt={tenant.tenant_info.tenant_name}
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                  }}
                                   onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.style.display = "none";
                                   }}
                                 />
                               ) : (
-                                <Typography sx={{ fontWeight: 700, color: "grey.700" }}>
-                                  {tenant.tenant_name
+                                <Typography
+                                  sx={{ fontWeight: 700, color: "grey.700" }}
+                                >
+                                  {tenant.tenant_info.tenant_name
                                     ?.split(" ")
                                     .map((word) => word[0])
                                     .join("")
@@ -721,13 +515,13 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                               variant="body2"
                               sx={{ fontWeight: 600, color: "primary.main" }}
                             >
-                              {tenant.tenant_name}
+                              {tenant.tenant_info.tenant_name}
                             </Typography>
                             <Typography
                               variant="caption"
                               sx={{ color: "grey.600" }}
                             >
-                              {tenant.industry}
+                              {tenant.tenant_info.industry}
                             </Typography>
                           </TableCell>
                           {/* Location & Sub-location */}
@@ -754,15 +548,13 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                               label={leaseExpiration ?? "--"}
                               size="small"
                               // color={
-                              //   Number(monthsUntilExpiration) < 6
+                              //   Number(months_until_expiration) < 6
                               //     ? "error"
-                              //     : Number(monthsUntilExpiration) <= 15
+                              //     : Number(months_until_expiration) <= 15
                               //     ? "warning"
                               //     : "success"
                               // }
-                              sx={{ fontWeight: 500 ,
-                                color : "black"
-                              }}
+                              sx={{ fontWeight: 500, color: "black" }}
                             />
                             <Typography
                               variant="caption"
@@ -772,8 +564,8 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                                 mt: 0.5,
                               }}
                             >
-                              {monthsUntilExpiration !== "--"
-                                ? `${monthsUntilExpiration} months`
+                              {months_until_expiration !== "--"
+                                ? `${months_until_expiration} months`
                                 : "--"}
                             </Typography>
                           </TableCell>
@@ -819,14 +611,19 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
                                 variant="body2"
                                 sx={{ color: "grey.800" }}
                               >
-                                {getLatestJobCount(tenant.job_counts) ?? "N/A"}
+                                {getLatestJobCount(
+                                  tenant.tenant_info.job_counts
+                                ) ?? "N/A"}
                               </Typography>
                             </Box>
                           </TableCell>
                           {/* Actions */}
                           <SaveForLaterButton
-                             userId={"brokerhq"} tenantId={tenant.tenant_id || tenant._id} 
-                          
+                            userId={"brokerhq"}
+                            tenantId={
+                              tenant.tenant_info.tenant_id ||
+                              tenant.tenant_info._id
+                            }
                           />
                         </StyledTableRow>
                       );
