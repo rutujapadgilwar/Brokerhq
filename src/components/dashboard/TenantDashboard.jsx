@@ -166,7 +166,6 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
               tenantCity?.includes(loc.toLowerCase()) ||
               tenantState?.includes(loc.toLowerCase())
           );
-
         return (
           matchesSearch &&
           matchesIndustry &&
