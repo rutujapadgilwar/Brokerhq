@@ -25,6 +25,9 @@ export default function PrivateCompanyDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [newsLoading, setNewsLoading] = useState(null);
   const [industryData, setIndustryData] = useState(null);
+  const [competitors, setCompetitors] = useState([]);
+  const [competitorLoading, setCompetitorLoading] = useState(false);
+  const [competitorError, setCompetitorError] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
@@ -47,6 +50,21 @@ export default function PrivateCompanyDetailsPage() {
 
         const companyData = companyRes.data.company_data;
         setData(companyRes.data);
+
+        try {
+          setCompetitorLoading(true);
+
+          const competitorRes = await axios.get(
+            `${backendUrl}/api/${id}/privateCompetitors`
+          );
+
+          setCompetitors(competitorRes.data.similar_companies || []);
+        } catch (err) {
+          console.error("Error fetching competitors:", err);
+          setCompetitorError("Unable to load competitor list");
+        } finally {
+          setCompetitorLoading(false);
+        }
         if (companyData?.sector) {
           const encodedSector = encodeURIComponent(companyData.sector);
           const industryRes = await axios.get(
@@ -320,7 +338,7 @@ export default function PrivateCompanyDetailsPage() {
 
           {newsLoading ? (
             <Typography color="text.secondary">Loading news...</Typography>
-          ) : news.length === 0 ? (
+          ) : !news || news.length === 0 ? (
             <Typography color="text.secondary">
               No recent news found.
             </Typography>
@@ -511,6 +529,49 @@ export default function PrivateCompanyDetailsPage() {
             </Card>
           )}
         </Box>
+
+        {/*Competitors List*/}
+        <Card sx={{ mt: 6 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, p: 2 }}>
+            Competitor Companies
+          </Typography>
+          <CardContent>
+            {competitorLoading && (
+              <Typography variant="body2">Loading competitors...</Typography>
+            )}
+
+            {!competitorLoading && competitors.length === 0 && (
+              <Typography variant="body2" color="text.secondary">
+                No similar companies found.
+              </Typography>
+            )}
+
+            <Grid container spacing={2}>
+              {competitors.map((item) => (
+                <Grid item xs={12} md={6} key={item._id}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      border: "1px solid #eee",
+                      borderRadius: 2,
+                      cursor: "pointer",
+                      "&:hover": { backgroundColor: "#fafafa" },
+                    }}
+                    onClick={() => navigate(`/private_company/${item._id}`)}
+                  >
+                    <Typography fontWeight={600}>
+                      {item.company_name}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary">
+                      Employees: {item.employee_count}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </CardContent>
+        </Card>
       </Box>
     );
   }
