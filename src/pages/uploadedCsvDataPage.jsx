@@ -19,6 +19,7 @@ import axios from "axios";
 import Navbar from "../components/dashboard/Navbar";
 import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
+import TablePagination from "@mui/material/TablePagination";
 
 export default function UploadedCsvDataPage() {
   const [data, setData] = useState([]);
@@ -30,6 +31,8 @@ export default function UploadedCsvDataPage() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const userId = "brokerhq"; // ⚙️ Replace with your actual logged-in user ID
   const [message, setMessage] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Fetch upload history
   useEffect(() => {
@@ -152,6 +155,18 @@ export default function UploadedCsvDataPage() {
     if (!id) return console.error("❌ company_id missing", id);
     navigate(`/private_company/${id}`);
   };
+  const handleChangePage = (event, newPage) => {
+  setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+  const paginatedData = data.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box sx={{ p: 4 }}>
@@ -298,7 +313,7 @@ export default function UploadedCsvDataPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <StyledTableRow
                   key={row._id || idx}
                   onClick={() => handleRowClick(row._id)}
@@ -329,6 +344,15 @@ export default function UploadedCsvDataPage() {
                 </StyledTableRow>
               ))}
             </TableBody>
+            <TablePagination
+              component="div"
+              count={data.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+          />
           </Table>
         )}
       </Paper>
