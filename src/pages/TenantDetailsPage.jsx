@@ -184,17 +184,49 @@ const TenantDetailsPage = () => {
           })
         );
 
+        console.log("📊 Total leases found:", leaseList.length);
         setLeases(leaseList);
 
         // 4. US vs NON-US LEASE SPLIT
-        const us = { upcoming: [], expired: [] };
-        const nonUs = { upcoming: [], expired: [] };
+        const us = { upcoming: [], expired: [], noExpiration: [] };
+        const nonUs = { upcoming: [], expired: [], noExpiration: [] };
 
         leaseList.forEach((lease) => {
           const dateString =
             lease["clean_lease_expiration_date"] ||
             lease["Lease Expiration Date"];
 
+          const hasSquareFootage =
+            lease["Square Foot Area"] &&
+            lease["Square Foot Area"] !== "Not specified" &&
+            lease["Square Foot Area"] !== "null";
+
+          const hasAddress =
+            lease["Lease Property Address"] &&
+            lease["Lease Property Address"] !== "Not specified" &&
+            lease["Lease Property Address"] !== "null";
+
+          // If no valid date but has square footage and address, add to noExpiration
+          if (
+            (!dateString ||
+              dateString === "null" ||
+              dateString === "Not specified") &&
+            hasSquareFootage &&
+            hasAddress
+          ) {
+            const target = isUSAddress(lease["Lease Property Address"])
+              ? us
+              : nonUs;
+            target.noExpiration.push(lease);
+            console.log("✅ Added to noExpiration:", {
+              address: lease["Lease Property Address"],
+              squareFootage: lease["Square Foot Area"],
+              propertyType: lease["Property Type"],
+            });
+            return;
+          }
+
+          // If has valid date, process as before
           if (!dateString || dateString === "null") return;
 
           const leaseDate = new Date(dateString);
@@ -219,15 +251,50 @@ const TenantDetailsPage = () => {
               )
           );
 
-        setUsLeases({
+        const usLeasesData = {
           upcoming: sortByDate(us.upcoming),
           expired: sortByDate(us.expired),
-        });
+          noExpiration: us.noExpiration,
+        };
 
-        setNonUsLeases({
+        const nonUsLeasesData = {
           upcoming: sortByDate(nonUs.upcoming),
           expired: sortByDate(nonUs.expired),
+          noExpiration: nonUs.noExpiration,
+        };
+
+        // Console log summary
+        console.log("🇺🇸 US Leases Summary:", {
+          upcoming: usLeasesData.upcoming.length,
+          expired: usLeasesData.expired.length,
+          noExpiration: usLeasesData.noExpiration.length,
+          total:
+            usLeasesData.upcoming.length +
+            usLeasesData.expired.length +
+            usLeasesData.noExpiration.length,
         });
+
+        console.log("🌍 Non-US Leases Summary:", {
+          upcoming: nonUsLeasesData.upcoming.length,
+          expired: nonUsLeasesData.expired.length,
+          noExpiration: nonUsLeasesData.noExpiration.length,
+          total:
+            nonUsLeasesData.upcoming.length +
+            nonUsLeasesData.expired.length +
+            nonUsLeasesData.noExpiration.length,
+        });
+
+        console.log(
+          "📍 US Leases with no expiration date:",
+          usLeasesData.noExpiration
+        );
+        console.log(
+          "📍 Non-US Leases with no expiration date:",
+          nonUsLeasesData.noExpiration
+        );
+
+        setUsLeases(usLeasesData);
+        setNonUsLeases(nonUsLeasesData);
 
         // 5. NEWS, 10Q, 8K, AI SUMMARY
         setNewsData(master.news_data[0] || []);
@@ -514,12 +581,15 @@ const TenantDetailsPage = () => {
                   {/* Lease Properties Section - Separate US and Non-US with Collapsible Expired */}
                   {(usLeases.upcoming.length > 0 ||
                     usLeases.expired.length > 0 ||
+                    usLeases.noExpiration?.length > 0 ||
                     nonUsLeases.upcoming.length > 0 ||
-                    nonUsLeases.expired.length > 0) && (
+                    nonUsLeases.expired.length > 0 ||
+                    nonUsLeases.noExpiration?.length > 0) && (
                     <Container sx={{ mt: 2, mb: 2 }}>
                       {/* US Properties Card */}
                       {(usLeases.upcoming.length > 0 ||
-                        usLeases.expired.length > 0) && (
+                        usLeases.expired.length > 0 ||
+                        usLeases.noExpiration?.length > 0) && (
                         <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 4 }}>
                           <CardHeader
                             avatar={
@@ -528,7 +598,9 @@ const TenantDetailsPage = () => {
                               </CardIcon>
                             }
                             title={`US Lease Properties (${
-                              usLeases.upcoming.length + usLeases.expired.length
+                              usLeases.upcoming.length +
+                              usLeases.expired.length +
+                              (usLeases.noExpiration?.length || 0)
                             })`}
                             titleTypographyProps={{
                               variant: "h5",
@@ -536,7 +608,14 @@ const TenantDetailsPage = () => {
                               sx: { color: "#1e293b" },
                             }}
                             subheader={
-                              <Box sx={{ mt: 1, display: "flex", gap: 2 }}>
+                              <Box
+                                sx={{
+                                  mt: 1,
+                                  display: "flex",
+                                  gap: 2,
+                                  flexWrap: "wrap",
+                                }}
+                              >
                                 <Chip
                                   label={`${usLeases.upcoming.length} Upcoming`}
                                   color="success"
@@ -549,6 +628,14 @@ const TenantDetailsPage = () => {
                                   size="small"
                                   variant="outlined"
                                 />
+                                {usLeases.noExpiration?.length > 0 && (
+                                  <Chip
+                                    label={`${usLeases.noExpiration.length} No Expiration`}
+                                    color="warning"
+                                    size="small"
+                                    variant="outlined"
+                                  />
+                                )}
                               </Box>
                             }
                           />
@@ -675,6 +762,157 @@ const TenantDetailsPage = () => {
                               </>
                             )}
 
+                            {/* No Expiration Date US Leases - Collapsible */}
+                            {usLeases.noExpiration?.length > 0 && (
+                              <Accordion
+                                sx={{
+                                  borderRadius: 2,
+                                  border: "1px solid #fbbf24",
+                                  boxShadow: 3,
+                                  "&:before": { display: "none" },
+                                  mb: 2,
+                                }}
+                              >
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  sx={{
+                                    bgcolor: "#fef3c7",
+                                    borderRadius: "8px 8px 0 0",
+                                    minHeight: 56,
+                                    "&.Mui-expanded": {
+                                      minHeight: 56,
+                                    },
+                                    "& .MuiAccordionSummary-content": {
+                                      margin: "12px 0",
+                                      "&.Mui-expanded": {
+                                        margin: "12px 0",
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      fontWeight: 600,
+                                      color: "#d97706",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    📋 No Expiration Date Specified
+                                    <Chip
+                                      label={usLeases.noExpiration.length}
+                                      color="warning"
+                                      size="small"
+                                      sx={{ ml: 1 }}
+                                    />
+                                  </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails sx={{ pt: 3 }}>
+                                  <Grid container spacing={3}>
+                                    {usLeases.noExpiration.map(
+                                      (lease, index) => (
+                                        <Grid
+                                          item
+                                          xs={12}
+                                          md={6}
+                                          lg={4}
+                                          key={`us-noexp-${index}`}
+                                        >
+                                          <Card
+                                            sx={{
+                                              cursor: "pointer",
+                                              borderRadius: 3,
+                                              boxShadow: 4,
+                                              border: "2px solid #fbbf24",
+                                              transition:
+                                                "transform 0.3s, box-shadow 0.3s",
+                                              "&:hover": {
+                                                transform: "translateY(-5px)",
+                                                boxShadow: 8,
+                                              },
+                                              height: "100%",
+                                              display: "flex",
+                                              flexDirection: "column",
+                                            }}
+                                          >
+                                            <CardActionArea
+                                              component="a"
+                                              href={lease.url || "#"}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              sx={{ flexGrow: 1 }}
+                                            >
+                                              <CardHeader
+                                                avatar={
+                                                  <Avatar
+                                                    sx={{ bgcolor: "#d97706" }}
+                                                  >
+                                                    <BusinessIcon />
+                                                  </Avatar>
+                                                }
+                                                title={
+                                                  <Typography
+                                                    variant="h6"
+                                                    sx={{
+                                                      fontWeight: 600,
+                                                      lineHeight: 1.3,
+                                                      fontSize: "0.95rem",
+                                                    }}
+                                                  >
+                                                    {
+                                                      lease[
+                                                        "Lease Property Address"
+                                                      ]
+                                                    }
+                                                  </Typography>
+                                                }
+                                                subheader={
+                                                  <Chip
+                                                    label="Expiration: Not Specified"
+                                                    color="warning"
+                                                    size="small"
+                                                    sx={{ mt: 1 }}
+                                                  />
+                                                }
+                                              />
+                                              <CardContent sx={{ pt: 1 }}>
+                                                <Box sx={{ mb: 1 }}>
+                                                  <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                  >
+                                                    <strong>
+                                                      Property Type:
+                                                    </strong>{" "}
+                                                    {lease["Property Type"]}
+                                                  </Typography>
+                                                </Box>
+                                                <Box>
+                                                  <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                  >
+                                                    <strong>
+                                                      Square Footage:
+                                                    </strong>{" "}
+                                                    {lease[
+                                                      "Square Foot Area"
+                                                    ] || "N/A"}
+                                                  </Typography>
+                                                </Box>
+                                              </CardContent>
+                                            </CardActionArea>
+                                          </Card>
+                                        </Grid>
+                                      )
+                                    )}
+                                  </Grid>
+                                </AccordionDetails>
+                              </Accordion>
+                            )}
+
                             {/* Expired US Leases - Collapsible */}
                             {usLeases.expired.length > 0 && (
                               <Accordion
@@ -682,7 +920,7 @@ const TenantDetailsPage = () => {
                                   borderRadius: 2,
                                   border: "1px solid #fecaca",
                                   boxShadow: 3,
-                                  "&:before": { display: "none" }, // Remove default MUI accordion line
+                                  "&:before": { display: "none" },
                                   mb: 2,
                                 }}
                               >
@@ -836,13 +1074,15 @@ const TenantDetailsPage = () => {
 
                       {/* Non-US Properties Card */}
                       {(nonUsLeases.upcoming.length > 0 ||
-                        nonUsLeases.expired.length > 0) && (
+                        nonUsLeases.expired.length > 0 ||
+                        nonUsLeases.noExpiration?.length > 0) && (
                         <Card sx={{ borderRadius: 3, boxShadow: 4 }}>
                           <CardHeader
                             avatar={<CardIcon variant="timeline">🌍</CardIcon>}
                             title={`International Lease Properties (${
                               nonUsLeases.upcoming.length +
-                              nonUsLeases.expired.length
+                              nonUsLeases.expired.length +
+                              (nonUsLeases.noExpiration?.length || 0)
                             })`}
                             titleTypographyProps={{
                               variant: "h5",
@@ -850,7 +1090,14 @@ const TenantDetailsPage = () => {
                               sx: { color: "#1e293b" },
                             }}
                             subheader={
-                              <Box sx={{ mt: 1, display: "flex", gap: 2 }}>
+                              <Box
+                                sx={{
+                                  mt: 1,
+                                  display: "flex",
+                                  gap: 2,
+                                  flexWrap: "wrap",
+                                }}
+                              >
                                 <Chip
                                   label={`${nonUsLeases.upcoming.length} Upcoming`}
                                   color="success"
@@ -863,6 +1110,14 @@ const TenantDetailsPage = () => {
                                   size="small"
                                   variant="outlined"
                                 />
+                                {nonUsLeases.noExpiration?.length > 0 && (
+                                  <Chip
+                                    label={`${nonUsLeases.noExpiration.length} No Expiration`}
+                                    color="warning"
+                                    size="small"
+                                    variant="outlined"
+                                  />
+                                )}
                               </Box>
                             }
                           />
@@ -989,6 +1244,157 @@ const TenantDetailsPage = () => {
                               </>
                             )}
 
+                            {/* No Expiration Date Non-US Leases - Collapsible */}
+                            {nonUsLeases.noExpiration?.length > 0 && (
+                              <Accordion
+                                sx={{
+                                  borderRadius: 2,
+                                  border: "1px solid #fbbf24",
+                                  boxShadow: 3,
+                                  "&:before": { display: "none" },
+                                  mb: 2,
+                                }}
+                              >
+                                <AccordionSummary
+                                  expandIcon={<ExpandMoreIcon />}
+                                  sx={{
+                                    bgcolor: "#fef3c7",
+                                    borderRadius: "8px 8px 0 0",
+                                    minHeight: 56,
+                                    "&.Mui-expanded": {
+                                      minHeight: 56,
+                                    },
+                                    "& .MuiAccordionSummary-content": {
+                                      margin: "12px 0",
+                                      "&.Mui-expanded": {
+                                        margin: "12px 0",
+                                      },
+                                    },
+                                  }}
+                                >
+                                  <Typography
+                                    variant="h6"
+                                    sx={{
+                                      fontWeight: 600,
+                                      color: "#d97706",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    📋 No Expiration Date Specified
+                                    <Chip
+                                      label={nonUsLeases.noExpiration.length}
+                                      color="warning"
+                                      size="small"
+                                      sx={{ ml: 1 }}
+                                    />
+                                  </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails sx={{ pt: 3 }}>
+                                  <Grid container spacing={3}>
+                                    {nonUsLeases.noExpiration.map(
+                                      (lease, index) => (
+                                        <Grid
+                                          item
+                                          xs={12}
+                                          md={6}
+                                          lg={4}
+                                          key={`nonus-noexp-${index}`}
+                                        >
+                                          <Card
+                                            sx={{
+                                              cursor: "pointer",
+                                              borderRadius: 3,
+                                              boxShadow: 4,
+                                              border: "2px solid #fbbf24",
+                                              transition:
+                                                "transform 0.3s, box-shadow 0.3s",
+                                              "&:hover": {
+                                                transform: "translateY(-5px)",
+                                                boxShadow: 8,
+                                              },
+                                              height: "100%",
+                                              display: "flex",
+                                              flexDirection: "column",
+                                            }}
+                                          >
+                                            <CardActionArea
+                                              component="a"
+                                              href={lease.url || "#"}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              sx={{ flexGrow: 1 }}
+                                            >
+                                              <CardHeader
+                                                avatar={
+                                                  <Avatar
+                                                    sx={{ bgcolor: "#d97706" }}
+                                                  >
+                                                    <BusinessIcon />
+                                                  </Avatar>
+                                                }
+                                                title={
+                                                  <Typography
+                                                    variant="h6"
+                                                    sx={{
+                                                      fontWeight: 600,
+                                                      lineHeight: 1.3,
+                                                      fontSize: "0.95rem",
+                                                    }}
+                                                  >
+                                                    {
+                                                      lease[
+                                                        "Lease Property Address"
+                                                      ]
+                                                    }
+                                                  </Typography>
+                                                }
+                                                subheader={
+                                                  <Chip
+                                                    label="Expiration: Not Specified"
+                                                    color="warning"
+                                                    size="small"
+                                                    sx={{ mt: 1 }}
+                                                  />
+                                                }
+                                              />
+                                              <CardContent sx={{ pt: 1 }}>
+                                                <Box sx={{ mb: 1 }}>
+                                                  <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                  >
+                                                    <strong>
+                                                      Property Type:
+                                                    </strong>{" "}
+                                                    {lease["Property Type"]}
+                                                  </Typography>
+                                                </Box>
+                                                <Box>
+                                                  <Typography
+                                                    variant="body2"
+                                                    color="text.secondary"
+                                                  >
+                                                    <strong>
+                                                      Square Footage:
+                                                    </strong>{" "}
+                                                    {lease[
+                                                      "Square Foot Area"
+                                                    ] || "N/A"}
+                                                  </Typography>
+                                                </Box>
+                                              </CardContent>
+                                            </CardActionArea>
+                                          </Card>
+                                        </Grid>
+                                      )
+                                    )}
+                                  </Grid>
+                                </AccordionDetails>
+                              </Accordion>
+                            )}
+
                             {/* Expired Non-US Leases - Collapsible */}
                             {nonUsLeases.expired.length > 0 && (
                               <Accordion
@@ -996,7 +1402,7 @@ const TenantDetailsPage = () => {
                                   borderRadius: 2,
                                   border: "1px solid #fecaca",
                                   boxShadow: 3,
-                                  "&:before": { display: "none" }, // Remove default MUI accordion line
+                                  "&:before": { display: "none" },
                                   mb: 2,
                                 }}
                               >
