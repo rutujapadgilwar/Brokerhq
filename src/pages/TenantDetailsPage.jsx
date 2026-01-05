@@ -295,6 +295,20 @@ const TenantDetailsPage = () => {
 
         setUsLeases(usLeasesData);
         setNonUsLeases(nonUsLeasesData);
+         // 5. CALCULATE LEASE COUNTS FROM ACTUAL DATA
+        const calculatedLeaseCounts = {
+          usTotal: usLeasesData.upcoming.length + 
+                  usLeasesData.expired.length + 
+                  (usLeasesData.noExpiration?.length || 0),
+          nonUsTotal: nonUsLeasesData.upcoming.length + 
+                      nonUsLeasesData.expired.length + 
+                      (nonUsLeasesData.noExpiration?.length || 0),
+          total: leaseList.length
+        };
+
+        setLeaseCounts(calculatedLeaseCounts);
+
+        console.log("📈 Calculated Lease Counts:", calculatedLeaseCounts);
 
         // 5. NEWS, 10Q, 8K, AI SUMMARY
         setNewsData(master.news_data[0] || []);
