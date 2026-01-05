@@ -77,6 +77,7 @@ const TenantDashboard = ({ viewMode, setViewMode, search }) => {
         const res = await fetch(`${backendUrl}/api/tenant_dashboard`);
         if (!res.ok) throw new Error("Failed to fetch tenant dashboard data");
         const data = await res.json();
+        console.log(data);
         setTenantData(data.data);
       } catch (err) {
         setError(err.message);
