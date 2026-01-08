@@ -31,66 +31,90 @@ import ExpansionNews from "../components/tenantDetailsPage/ExpansionNews";
 import ContractionNews from "../components/tenantDetailsPage/ContractionNews";
 import HeaderSection from "../components/tenantDetailsPage/HeaderSection";
 import CompanySummary from "../components/tenantDetailsPage/company_AI_summary";
-import NonUsLeasesSection from "../components/tenantDetailsPage/NonUsLeasesSection";
+import LeaseSummaryCard from "../components/tenantDetailsPage/10kLeaseSummaryCard"
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 const usStates = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California",
-  "Colorado",
-  "Connecticut",
-  "Delaware",
-  "Florida",
-  "Georgia",
-  "Hawaii",
-  "Idaho",
-  "Illinois",
-  "Indiana",
-  "Iowa",
-  "Kansas",
-  "Kentucky",
-  "Louisiana",
-  "Maine",
-  "Maryland",
-  "Massachusetts",
-  "Michigan",
-  "Minnesota",
-  "Mississippi",
-  "Missouri",
-  "Montana",
-  "Nebraska",
-  "Nevada",
-  "New Hampshire",
-  "New Jersey",
-  "New Mexico",
-  "New York",
-  "North Carolina",
-  "North Dakota",
-  "Ohio",
-  "Oklahoma",
-  "Oregon",
-  "Pennsylvania",
-  "Rhode Island",
-  "South Carolina",
-  "South Dakota",
-  "Tennessee",
-  "Texas",
-  "Utah",
-  "Vermont",
-  "Virginia",
-  "Washington",
-  "West Virginia",
-  "Wisconsin",
-  "Wyoming",
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+  "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming"
 ];
 
-const isUSAddress = (address) =>
-  address &&
-  usStates.some((state) => address.toLowerCase().includes(state.toLowerCase()));
+const usStateAbbreviations = [
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+];
 
+const isUSAddress = (address) => {
+  if (!address || typeof address !== 'string') return false;
+  
+  const addressLower = address.toLowerCase().trim();
+  
+  // Check for explicit US indicators
+  const usIndicators = [
+    'u.s.', 'u.s.a', 'usa', 'united states',
+    'u. s.', 'us,', ', us'
+  ];
+  
+  if (usIndicators.some(indicator => addressLower.includes(indicator))) {
+    return true;
+  }
+  
+  // Check for state names (full names)
+  if (usStates.some(state => addressLower.includes(state.toLowerCase()))) {
+    return true;
+  }
+  
+  // Check for state abbreviations with common patterns
+  // Pattern 1: State abbreviation followed by zip code (e.g., "CA 94102", "TX 75001")
+  const stateZipPattern = new RegExp(`\\b(${usStateAbbreviations.join('|')})\\s+\\d{5}`, 'i');
+  if (stateZipPattern.test(address)) {
+    return true;
+  }
+  
+  // Pattern 2: City, State format (e.g., "Bellevue, WA", "Austin, TX")
+  const cityStatePattern = new RegExp(`,\\s*(${usStateAbbreviations.join('|')})\\b`, 'i');
+  if (cityStatePattern.test(address)) {
+    return true;
+  }
+  
+  // Pattern 3: Just state abbreviation at the end (e.g., "123 Main St WA")
+  const stateAtEndPattern = new RegExp(`\\b(${usStateAbbreviations.join('|')})$`, 'i');
+  if (stateAtEndPattern.test(address.trim())) {
+    return true;
+  }
+  
+  // Check for common US zip code pattern (5 digits or 5+4 format)
+  const zipPattern = /\b\d{5}(-\d{4})?\b/;
+  if (zipPattern.test(address)) {
+    // If it has a zip code, check if it doesn't have obvious non-US indicators
+    const nonUSIndicators = [
+      'canada', 'mexico', 'uk', 'united kingdom', 'china', 'japan',
+      'germany', 'france', 'india', 'australia', 'brazil', 'spain',
+      'italy', 'korea', 'netherlands', 'sweden', 'switzerland'
+    ];
+    
+    const hasNonUSIndicator = nonUSIndicators.some(country => 
+      addressLower.includes(country)
+    );
+    
+    if (!hasNonUSIndicator) {
+      return true;
+    }
+  }
+  
+  return false;
+};
 // Styled components
 const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: 16,
@@ -137,6 +161,7 @@ const TenantDetailsPage = () => {
   const [eightkdata, setEightkdata] = useState([]);
   const [companyAISummary, setCompanyAISummary] = useState({ summary: "" });
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const [propertyData, setPropertyData] = useState({});
   const [leaseCounts, setLeaseCounts] = useState({
     usTotal: 0,
     nonUsTotal: 0,
@@ -156,7 +181,7 @@ const TenantDetailsPage = () => {
 
         // 2. PROPERTY + LEASE COUNTS
         const propertyData = master.property_data[0] || {};
-
+        setPropertyData(propertyData);
         setLeaseCounts(
           propertyData?.lease_counts || {
             usTotal: 0,
@@ -589,7 +614,12 @@ const TenantDetailsPage = () => {
                   </List>
                 </CardContent>
               </StyledCard>
-
+              
+              <Box sx={{ mt: 4 }}>
+                <LeaseSummaryCard
+                  propertyData={propertyData}
+                />
+              </Box>
               <StyledCard ref={propertyRef} sx={{ mt: 4 }}>
                 <CardContent>
                   {/* Lease Properties Section - Separate US and Non-US with Collapsible Expired */}
