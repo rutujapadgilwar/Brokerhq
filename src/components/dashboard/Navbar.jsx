@@ -178,7 +178,7 @@ const Navbar = () => {
             <Tooltip title="My Data">
               <IconButton
                 component={Link}
-                to="/getCsvData" // route to your uploaded CSV page
+                to="/getCsvData"
                 size="small"
                 sx={{
                   color:
@@ -257,7 +257,7 @@ const Navbar = () => {
                   transition: "all 0.3s ease",
                 }}
               >
-                <Avatar sx={{ width: 32, height: 32 }}>
+                <Avatar sx={{ width: 40, height: 40 }}>
                   <PersonIcon />
                 </Avatar>
               </IconButton>
